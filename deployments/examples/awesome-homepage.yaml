@@ -1,0 +1,602 @@
+# Awesome Homepage - Modern HTML Landing Page
+# A stunning, fully-featured HTML homepage with animations and modern design
+# Copy and paste this entire file to deploy an awesome homepage to your cluster
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: awesome-homepage
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My Awesome Homelab</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --primary: #6366f1;
+                --secondary: #8b5cf6;
+                --accent: #ec4899;
+                --dark: #0f172a;
+                --light: #f8fafc;
+                --gray: #64748b;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: white;
+                overflow-x: hidden;
+            }
+
+            /* Animated Background */
+            .bg-animation {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 0;
+                overflow: hidden;
+            }
+
+            .particle {
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                animation: float 20s infinite ease-in-out;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translate(0, 0) scale(1); opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+            }
+
+            /* Container */
+            .container {
+                position: relative;
+                z-index: 1;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem;
+            }
+
+            /* Header */
+            header {
+                text-align: center;
+                padding: 4rem 0 2rem;
+                animation: fadeInDown 1s ease-out;
+            }
+
+            @keyframes fadeInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .logo {
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 2rem;
+                background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+                border-radius: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 4rem;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255,255,255,0.3);
+                animation: pulse 3s infinite;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+
+            h1 {
+                font-size: 4rem;
+                font-weight: 800;
+                margin-bottom: 1rem;
+                background: linear-gradient(135deg, #fff, #f0f0f0);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+
+            .tagline {
+                font-size: 1.5rem;
+                font-weight: 300;
+                opacity: 0.9;
+                margin-bottom: 3rem;
+            }
+
+            /* Stats */
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 2rem;
+                margin: 3rem 0;
+                animation: fadeInUp 1s ease-out 0.3s both;
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .stat-card {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 2rem;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-10px);
+                background: rgba(255, 255, 255, 0.15);
+                box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            }
+
+            .stat-number {
+                font-size: 3rem;
+                font-weight: 800;
+                margin-bottom: 0.5rem;
+                background: linear-gradient(135deg, #fff, #f0f0f0);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .stat-label {
+                font-size: 1rem;
+                opacity: 0.8;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            /* Services Grid */
+            .services {
+                margin: 4rem 0;
+                animation: fadeInUp 1s ease-out 0.6s both;
+            }
+
+            .services h2 {
+                font-size: 2.5rem;
+                text-align: center;
+                margin-bottom: 3rem;
+                font-weight: 700;
+            }
+
+            .services-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 2rem;
+            }
+
+            .service-card {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 2.5rem;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                transition: all 0.3s ease;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .service-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .service-card:hover::before {
+                opacity: 1;
+            }
+
+            .service-card:hover {
+                transform: translateY(-10px) scale(1.02);
+                box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+
+            .service-icon {
+                font-size: 3.5rem;
+                margin-bottom: 1.5rem;
+                display: block;
+            }
+
+            .service-card h3 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+                font-weight: 600;
+            }
+
+            .service-card p {
+                opacity: 0.8;
+                line-height: 1.6;
+                margin-bottom: 1.5rem;
+            }
+
+            .service-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: white;
+                text-decoration: none;
+                font-weight: 600;
+                padding: 0.75rem 1.5rem;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            }
+
+            .service-link:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: translateX(5px);
+            }
+
+            /* Quick Links */
+            .quick-links {
+                margin: 4rem 0;
+                text-align: center;
+                animation: fadeInUp 1s ease-out 0.9s both;
+            }
+
+            .quick-links h2 {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .links-container {
+                display: flex;
+                justify-content: center;
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .link-btn {
+                padding: 1rem 2.5rem;
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50px;
+                color: white;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+
+            .link-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+
+            /* Footer */
+            footer {
+                text-align: center;
+                padding: 3rem 0;
+                margin-top: 4rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+                opacity: 0.8;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                h1 { font-size: 2.5rem; }
+                .tagline { font-size: 1.2rem; }
+                .stats { grid-template-columns: 1fr; }
+                .services-grid { grid-template-columns: 1fr; }
+            }
+
+            /* Status Indicator */
+            .status {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.75rem 1.5rem;
+                background: rgba(16, 185, 129, 0.2);
+                border: 2px solid rgba(16, 185, 129, 0.5);
+                border-radius: 50px;
+                margin-top: 1rem;
+                backdrop-filter: blur(10px);
+            }
+
+            .status-dot {
+                width: 12px;
+                height: 12px;
+                background: #10b981;
+                border-radius: 50%;
+                animation: blink 2s infinite;
+            }
+
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="bg-animation" id="particles"></div>
+
+        <div class="container">
+            <header>
+                <div class="logo">🚀</div>
+                <h1>My Awesome Homelab</h1>
+                <p class="tagline">Powered by Kubernetes & GitOps</p>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span>All Systems Operational</span>
+                </div>
+            </header>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Available</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Possibilities</div>
+                </div>
+            </div>
+
+            <div class="services">
+                <h2>🎯 Services</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <span class="service-icon">📊</span>
+                        <h3>Dashboard</h3>
+                        <p>Monitor your entire homelab infrastructure in real-time with beautiful visualizations.</p>
+                        <a href="#" class="service-link">Open Dashboard →</a>
+                    </div>
+
+                    <div class="service-card">
+                        <span class="service-icon">🤖</span>
+                        <h3>AI Models</h3>
+                        <p>Run powerful AI models locally with Ollama. Privacy-first machine learning.</p>
+                        <a href="#" class="service-link">Launch AI →</a>
+                    </div>
+
+                    <div class="service-card">
+                        <span class="service-icon">📦</span>
+                        <h3>Container Registry</h3>
+                        <p>Private Docker registry for all your container images and artifacts.</p>
+                        <a href="#" class="service-link">View Registry →</a>
+                    </div>
+
+                    <div class="service-card">
+                        <span class="service-icon">📈</span>
+                        <h3>Monitoring</h3>
+                        <p>Grafana dashboards with Prometheus metrics for complete observability.</p>
+                        <a href="#" class="service-link">View Metrics →</a>
+                    </div>
+
+                    <div class="service-card">
+                        <span class="service-icon">🔒</span>
+                        <h3>Security</h3>
+                        <p>Secure authentication and authorization with SSO and 2FA support.</p>
+                        <a href="#" class="service-link">Manage Access →</a>
+                    </div>
+
+                    <div class="service-card">
+                        <span class="service-icon">💾</span>
+                        <h3>Storage</h3>
+                        <p>Distributed storage with automatic backups and disaster recovery.</p>
+                        <a href="#" class="service-link">Manage Storage →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-links">
+                <h2>Quick Links</h2>
+                <div class="links-container">
+                    <a href="https://github.com/Taiwrash/trigra" class="link-btn">📖 Documentation</a>
+                    <a href="#" class="link-btn">⚙️ Settings</a>
+                    <a href="#" class="link-btn">📊 Status</a>
+                    <a href="#" class="link-btn">💬 Support</a>
+                </div>
+            </div>
+
+            <footer>
+                <p>🏠 Homelab • Deployed with TRIGRA - Kubernetes GitOps Homelab</p>
+                <p style="margin-top: 0.5rem; opacity: 0.6;">Built with ❤️ and ☕</p>
+            </footer>
+        </div>
+
+        <script>
+            // Create animated particles
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random starting position
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Random animation values
+                particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+
+            // Add smooth scroll
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Update service links (customize these URLs)
+            const serviceLinks = {
+                'Dashboard': 'http://dashboard.local',
+                'AI Models': 'http://ollama.local',
+                'Container Registry': 'http://registry.local',
+                'Monitoring': 'http://grafana.local',
+                'Security': 'http://auth.local',
+                'Storage': 'http://storage.local'
+            };
+
+            document.querySelectorAll('.service-card').forEach(card => {
+                const title = card.querySelector('h3').textContent;
+                const link = card.querySelector('.service-link');
+                if (serviceLinks[title]) {
+                    link.href = serviceLinks[title];
+                }
+            });
+        </script>
+    </body>
+    </html>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: awesome-homepage
+  namespace: default
+  labels:
+    app: awesome-homepage
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: awesome-homepage
+  template:
+    metadata:
+      labels:
+        app: awesome-homepage
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          name: http
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: html
+        configMap:
+          name: awesome-homepage
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awesome-homepage
+  namespace: default
+  labels:
+    app: awesome-homepage
+spec:
+  selector:
+    app: awesome-homepage
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: awesome-homepage
+  namespace: default
+  annotations:
+    # Uncomment based on your ingress controller
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx  # Change to your ingress class (nginx, traefik, etc.)
+  rules:
+  - host: awesome.local  # Change to your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: awesome-homepage
+            port:
+              number: 80
+  # Uncomment for TLS/HTTPS
+  # tls:
+  # - hosts:
+  #   - awesome.local
+  #   secretName: awesome-homepage-tls

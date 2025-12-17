@@ -1,0 +1,367 @@
+# Ollama + Open WebUI - Complete AI Stack
+# This manifest deploys Ollama with Open WebUI for a complete local AI experience
+# Copy and paste this entire file to run AI models with a beautiful web interface
+# 
+# After deployment:
+# 1. Access Open WebUI at http://openwebui.local (or via NodePort/port-forward)
+# 2. Pull models: kubectl exec -it deployment/ollama -- ollama pull gemma:2b
+# 3. Chat with your models through the web interface!
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi  # Adjust based on model sizes
+  # storageClassName: local-path  # Uncomment and adjust for your storage class
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openwebui-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi  # For Open WebUI data
+  # storageClassName: local-path  # Uncomment and adjust for your storage class
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: default
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        ports:
+        - containerPort: 11434
+          name: http
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
+        resources:
+          limits:
+            cpu: "2"
+            memory: "8Gi"
+            # Uncomment if you have GPU support
+            # nvidia.com/gpu: "1"
+          requests:
+            cpu: "500m"
+            memory: "4Gi"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 11434
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 11434
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: ollama-data
+        persistentVolumeClaim:
+          claimName: ollama-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: default
+  labels:
+    app: ollama
+spec:
+  selector:
+    app: ollama
+  ports:
+  - port: 11434
+    targetPort: 11434
+    name: http
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-webui
+  namespace: default
+  labels:
+    app: open-webui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    metadata:
+      labels:
+        app: open-webui
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: cp
+      containers:
+      - name: open-webui
+        image: ghcr.io/open-webui/open-webui:main
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://ollama.default.svc.cluster.local:11434"  # Use FQDN to bypass DNS issues
+        - name: WEBUI_SECRET_KEY
+          value: "change-this-to-a-random-secret"  # Change this!
+        - name: WEBUI_AUTH
+          value: "True"  # Set to False to disable authentication
+        - name: RAG_EMBEDDING_ENGINE
+          value: ""  # Disable RAG to work without internet
+        - name: RAG_EMBEDDING_MODEL
+          value: ""  # Disable embedding model downloads
+        - name: ENABLE_RAG_WEB_SEARCH
+          value: "false"  # Disable web search
+        volumeMounts:
+        - name: webui-data
+          mountPath: /app/backend/data
+        resources:
+          limits:
+            cpu: "1"
+            memory: "4Gi"  # Increased from 2Gi to prevent OOM
+          requests:
+            cpu: "500m"
+            memory: "1Gi"  # Increased from 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 300
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 300
+          periodSeconds: 10
+      volumes:
+      - name: webui-data
+        persistentVolumeClaim:
+          claimName: openwebui-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+  namespace: default
+  labels:
+    app: open-webui
+spec:
+  selector:
+    app: open-webui
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui-nodeport
+  namespace: default
+  labels:
+    app: open-webui
+spec:
+  selector:
+    app: open-webui
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30800  # Access via http://node-ip:30800
+    name: http
+  type: NodePort
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: open-webui
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  ingressClassName: nginx  # Change to your ingress class
+  rules:
+  - host: ai.local  # Change to your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: open-webui
+            port:
+              number: 8080
+  # Uncomment for TLS/HTTPS
+  # tls:
+  # - hosts:
+  #   - ai.local
+  #   secretName: open-webui-tls
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-stack-instructions
+  namespace: default
+data:
+  README.md: |
+    # Ollama + Open WebUI - Complete AI Stack
+    
+    ## 🚀 Quick Start
+    
+    ### 1. Access Open WebUI
+    
+    **Option A: NodePort (Easiest)**
+    ```bash
+    # Access via browser
+    http://<node-ip>:30800
+    ```
+    
+    **Option B: Port Forward**
+    ```bash
+    kubectl port-forward svc/open-webui 8080:8080 --address 0.0.0.0
+    # Then visit: http://<server-ip>:8080
+    ```
+    
+    **Option C: Ingress**
+    ```bash
+    # Add to /etc/hosts: <ingress-ip> ai.local
+    # Then visit: http://ai.local
+    ```
+    
+    ### 2. First Time Setup
+    
+    1. Open Open WebUI in your browser
+    2. Create an admin account (first user becomes admin)
+    3. You're ready to chat!
+    
+    ### 3. Pull AI Models
+    
+    **From the Open WebUI interface:**
+    - Click on your profile → Settings → Models
+    - Enter model name (e.g., "gemma:2b", "llama2", "mistral")
+    - Click "Pull Model"
+    
+    **Or from command line:**
+    ```bash
+    kubectl exec -it deployment/ollama -- ollama pull gemma:2b
+    kubectl exec -it deployment/ollama -- ollama pull llama2
+    kubectl exec -it deployment/ollama -- ollama pull mistral
+    ```
+    
+    ### 4. Start Chatting!
+    
+    - Select a model from the dropdown
+    - Start chatting with your local AI
+    - All data stays on your homelab!
+    
+    ## 📊 Popular Models
+    
+    | Model | Size | RAM Required | Best For |
+    |-------|------|--------------|----------|
+    | gemma:2b | 1.4GB | 4GB | Fast responses, testing |
+    | llama2 | 3.8GB | 8GB | General purpose |
+    | gemma:7b | 4.8GB | 8GB | Better quality |
+    | mistral | 4.1GB | 8GB | High performance |
+    | codellama | 3.8GB | 8GB | Code generation |
+    | llama2:13b | 7.4GB | 16GB | High quality |
+    | llama2:70b | 39GB | 64GB | Best quality |
+    
+    ## 🔧 Configuration
+    
+    ### Change Authentication
+    Edit the deployment:
+    ```bash
+    kubectl set env deployment/open-webui WEBUI_AUTH=False
+    ```
+    
+    ### Change Secret Key
+    ```bash
+    kubectl set env deployment/open-webui WEBUI_SECRET_KEY=your-random-secret
+    ```
+    
+    ### Add GPU Support
+    Uncomment GPU lines in ollama deployment and ensure your cluster has GPU support.
+    
+    ## 📈 Monitoring
+    
+    ```bash
+    # Check pods
+    kubectl get pods -l app=ollama
+    kubectl get pods -l app=open-webui
+    
+    # Check logs
+    kubectl logs -f deployment/ollama
+    kubectl logs -f deployment/open-webui
+    
+    # Check storage
+    kubectl get pvc
+    ```
+    
+    ## 🎯 Features
+    
+    - ✅ ChatGPT-like interface
+    - ✅ Multiple model support
+    - ✅ Conversation history
+    - ✅ User management
+    - ✅ Dark/Light themes
+    - ✅ Markdown support
+    - ✅ Code highlighting
+    - ✅ Document upload (RAG)
+    - ✅ Model management
+    - ✅ 100% private and local
+    
+    ## 🔒 Security Notes
+    
+    - Change WEBUI_SECRET_KEY to a random value
+    - Enable authentication (WEBUI_AUTH=True)
+    - Use Ingress with TLS for production
+    - Keep models and data on encrypted storage
+    
+    ## 💡 Tips
+    
+    - Start with smaller models (gemma:2b) to test
+    - Monitor resource usage with `kubectl top pods`
+    - Use persistent volumes to keep models across restarts
+    - Pull models during off-peak hours (they're large!)

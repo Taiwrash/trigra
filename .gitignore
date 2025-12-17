@@ -1,0 +1,41 @@
+# Binaries
+main
+/trigra
+gitops-controller
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes secrets
+secret.yaml
+*-secret.yaml
+!secret.yaml.example
+!*-secret.yaml.example
+!helm/**/templates/secret.yaml
+example.secret.yaml
+
+# Logs
+*.log

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: default
+data:
+  app.properties: |
+    environment=production
+    log_level=info
+    feature_flag_new_ui=true
+  
+  database.properties: |
+    host=postgres.default.svc.cluster.local
+    port=5432
+    database=myapp

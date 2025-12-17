@@ -1,0 +1,363 @@
+# Homepage Dashboard - Complete Kubernetes Deployment
+# Homepage is a highly customizable application dashboard for your homelab
+# https://gethomepage.dev/
+#
+# This manifest deploys Homepage with Kubernetes integration to monitor your cluster
+# Copy and paste this entire file to deploy Homepage to your cluster
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+secrets:
+  - name: homepage
+
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: homepage
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+  annotations:
+    kubernetes.io/service-account.name: homepage
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  kubernetes.yaml: |
+    mode: cluster
+  
+  settings.yaml: |
+    title: My Homelab Dashboard
+    favicon: https://gethomepage.dev/img/favicon.ico
+    theme: dark
+    color: slate
+    headerStyle: boxed
+    layout:
+      - Services:
+          style: row
+          columns: 3
+      - Infrastructure:
+          style: row
+          columns: 3
+      - Monitoring:
+          style: row
+          columns: 3
+  
+  custom.css: ""
+  custom.js: ""
+  
+  bookmarks.yaml: |
+    - Developer:
+        - GitHub:
+            - abbr: GH
+              href: https://github.com/
+        - GitLab:
+            - abbr: GL
+              href: https://gitlab.com/
+    
+    - Homelab:
+        - Kubernetes Docs:
+            - abbr: K8s
+              href: https://kubernetes.io/docs/
+        - Docker Hub:
+            - abbr: DH
+              href: https://hub.docker.com/
+    
+    - Media:
+        - YouTube:
+            - abbr: YT
+              href: https://youtube.com/
+        - Reddit:
+            - abbr: RD
+              href: https://reddit.com/
+  
+  services.yaml: |
+    - Infrastructure:
+        - Kubernetes Dashboard:
+            href: https://kubernetes.local
+            description: Cluster management interface
+            icon: kubernetes.png
+            
+        - Portainer:
+            href: https://portainer.local
+            description: Container management
+            icon: portainer.png
+        
+        - Traefik:
+            href: https://traefik.local
+            description: Reverse proxy & load balancer
+            icon: traefik.png
+    
+    - Monitoring:
+        - Grafana:
+            href: https://grafana.local
+            description: Metrics & dashboards
+            icon: grafana.png
+        
+        - Prometheus:
+            href: https://prometheus.local
+            description: Metrics collection
+            icon: prometheus.png
+    
+    - Services:
+        - Ollama:
+            href: http://ollama.local
+            description: Local AI models
+            icon: https://ollama.ai/public/icon-32x32.png
+  
+  widgets.yaml: |
+    - logo:
+        icon: https://gethomepage.dev/img/banner_light@2x.png
+    
+    - greeting:
+        text_size: xl
+        text: "Welcome to your Homelab!"
+    
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    
+    - resources:
+        backend: resources
+        expanded: true
+        cpu: true
+        memory: true
+    
+    - search:
+        provider: duckduckgo
+        target: _blank
+    
+    - datetime:
+        text_size: xl
+        format:
+          dateStyle: long
+          timeStyle: short
+          hourCycle: h23
+  
+  docker.yaml: ""
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - traefik.io
+    resources:
+      - ingressroutes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+      - gateways
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: default
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homepage
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homepage
+    spec:
+      serviceAccountName: homepage
+      automountServiceAccountToken: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      containers:
+        - name: homepage
+          image: "ghcr.io/gethomepage/homepage:latest"
+          imagePullPolicy: Always
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "*"  # Change to your domain for production
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app/config/custom.js
+              name: homepage-config
+              subPath: custom.js
+            - mountPath: /app/config/custom.css
+              name: homepage-config
+              subPath: custom.css
+            - mountPath: /app/config/bookmarks.yaml
+              name: homepage-config
+              subPath: bookmarks.yaml
+            - mountPath: /app/config/docker.yaml
+              name: homepage-config
+              subPath: docker.yaml
+            - mountPath: /app/config/kubernetes.yaml
+              name: homepage-config
+              subPath: kubernetes.yaml
+            - mountPath: /app/config/services.yaml
+              name: homepage-config
+              subPath: services.yaml
+            - mountPath: /app/config/settings.yaml
+              name: homepage-config
+              subPath: settings.yaml
+            - mountPath: /app/config/widgets.yaml
+              name: homepage-config
+              subPath: widgets.yaml
+            - mountPath: /app/config/logs
+              name: logs
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: homepage-config
+          configMap:
+            name: homepage
+        - name: logs
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: homepage
+
+---
+# Optional: Ingress for external access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+  annotations:
+    # Uncomment based on your ingress controller
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx  # Change to your ingress class (nginx, traefik, etc.)
+  rules:
+    - host: dashboard.local  # Change to your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
+  # Uncomment for TLS/HTTPS
+  # tls:
+  #   - hosts:
+  #       - dashboard.local
+  #     secretName: homepage-tls

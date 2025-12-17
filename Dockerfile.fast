@@ -1,0 +1,37 @@
+# Fast Dockerfile - uses pre-compiled binaries
+FROM alpine:latest
+
+# Add metadata
+LABEL org.opencontainers.image.title="TRIGRA - Kubernetes GitOps Homelab"
+LABEL org.opencontainers.image.description="Lightweight GitOps controller for Kubernetes homelab clusters"
+LABEL org.opencontainers.image.authors="Taiwrash"
+LABEL org.opencontainers.image.source="https://github.com/Taiwrash/trigra"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.version="1.0.0"
+
+# Install runtime dependencies
+RUN apk --no-cache add ca-certificates tzdata wget && \
+    addgroup -g 1000 trigra && \
+    adduser -D -u 1000 -G trigra trigra
+
+WORKDIR /app
+
+# Copy pre-compiled binary based on target architecture
+ARG TARGETARCH
+COPY bin/trigra-${TARGETARCH} ./trigra
+
+# Make executable and change ownership
+RUN chmod +x ./trigra && chown -R trigra:trigra /app
+
+# Switch to non-root user
+USER trigra
+
+# Expose port
+EXPOSE 8082
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8082/health || exit 1
+
+# Run the application
+ENTRYPOINT ["./trigra"]

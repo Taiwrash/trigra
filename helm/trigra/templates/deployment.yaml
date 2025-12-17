@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "trigra.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "trigra.fullname" . }}
+    {{- include "trigra.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "trigra.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "trigra.fullname" . }}
+    spec:
+      serviceAccountName: {{ include "trigra.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.env.serverPort | quote }}
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: trigra-secret
+                  key: github-token
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: trigra-secret
+                  key: webhook-secret
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
