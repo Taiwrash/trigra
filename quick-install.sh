@@ -55,9 +55,33 @@ echo -e "${YELLOW}Installing to namespace: ${NAMESPACE}${NC}"
 # Create namespace
 kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f - 2>/dev/null || true
 
-# Download and apply RBAC
+# Create temporary directory for manifests
+TEMP_DIR=$(mktemp -d)
+echo -e "${YELLOW}Downloading manifests to ${TEMP_DIR}...${NC}"
+
+# Function to download file
+download_file() {
+    local url=$1
+    local filename=$2
+    if command -v curl &> /dev/null; then
+        curl -fsSL "$url" -o "${TEMP_DIR}/${filename}"
+    elif command -v wget &> /dev/null; then
+        wget -q "$url" -O "${TEMP_DIR}/${filename}"
+    else
+        echo -e "${RED}✗ Neither curl nor wget found${NC}"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+}
+
+# Download manifests
+download_file "https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/rbac.yaml" "rbac.yaml"
+download_file "https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/deployment.yaml" "deployment.yaml"
+download_file "https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/service.yaml" "service.yaml"
+
+# Apply RBAC
 echo "Applying RBAC..."
-kubectl apply -f https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/rbac.yaml
+kubectl apply -f "${TEMP_DIR}/rbac.yaml"
 
 # Create secret
 echo "Creating secret..."
@@ -69,8 +93,11 @@ kubectl create secret generic trigra-secret \
 
 # Apply deployment
 echo "Deploying controller..."
-kubectl apply -f https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/deployment.yaml -n "$NAMESPACE"
-kubectl apply -f https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/service.yaml -n "$NAMESPACE"
+kubectl apply -f "${TEMP_DIR}/deployment.yaml" -n "$NAMESPACE"
+kubectl apply -f "${TEMP_DIR}/service.yaml" -n "$NAMESPACE"
+
+# Cleanup
+rm -rf "$TEMP_DIR"
 
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════╗${NC}"
@@ -88,7 +115,14 @@ echo -e "${YELLOW}Webhook Configuration:${NC}"
 echo "  Secret: $WEBHOOK_SECRET"
 echo ""
 # Get Service IP
-SERVICE_IP=$(kubectl get svc trigra -n "$NAMESPACE" -o jsonpath='{.spec.clusterIP}')
+# Get Service IP (Try LoadBalancer first, then ClusterIP)
+SERVICE_IP=$(kubectl get svc trigra -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+if [ -z "$SERVICE_IP" ]; then
+    SERVICE_IP=$(kubectl get svc trigra -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+fi
+if [ -z "$SERVICE_IP" ]; then
+    SERVICE_IP=$(kubectl get svc trigra -n "$NAMESPACE" -o jsonpath='{.spec.clusterIP}')
+fi
 PORT=$(kubectl get svc trigra -n "$NAMESPACE" -o jsonpath='{.spec.ports[0].port}')
 
 echo "Get webhook URL with:"
