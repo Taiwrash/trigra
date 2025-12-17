@@ -9,7 +9,7 @@ This guide helps you deploy the GitOps controller to your multi-node Kubernetes 
 The easiest way to install:
 
 ```bash
-./install.sh
+./quick-install.sh
 ```
 
 The script will:
