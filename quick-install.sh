@@ -18,7 +18,7 @@ echo -e "${GREEN}╚════════════════════
 echo ""
 
 # Parse arguments
-NAMESPACE="${1:-default}"
+NAMESPACE="${1}"
 WEBHOOK_SECRET="$2"
 
 # Generate webhook secret if not provided
@@ -30,7 +30,7 @@ if [ -z "$WEBHOOK_SECRET" ]; then
     else
         WEBHOOK_SECRET=$(date +%s%N | sha256sum 2>/dev/null | head -c 64 || date +%s | md5sum | head -c 64)
     fi
-    echo -e "${GREEN}Generated webhook secret: ${WEBHOOK_SECRET}${NC}"
+    echo -e "${GREEN}Generated webhook secret ${NC}"
 fi
 
 GITHUB_TOKEN="${3:-}"
