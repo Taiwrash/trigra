@@ -1,6 +1,7 @@
 # Binaries
 main
 /trigra
+/bin
 gitops-controller
 *.exe
 *.dll
