@@ -18,7 +18,7 @@ echo -e "${GREEN}╚════════════════════
 echo ""
 
 # Parse arguments
-NAMESPACE="${1}"
+NAMESPACE="$1"
 WEBHOOK_SECRET="$2"
 
 # Generate webhook secret if not provided
