@@ -203,9 +203,9 @@ echo -e "${GREEN}Next Steps:${NC}"
 echo "1. Configure GitHub webhook with the URL above"
 echo "2. run 'cloudflared tunnel --url http://${SERVICE_IP}:${PORT}' to expose your service securely"
  
-echo " "
+
 read -p "Do you want to start a temporary Cloudflare Tunnel now? (y/n) " -n 1 -r
-echo " "
+
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "${YELLOW}Starting Cloudflare Tunnel...${NC}"
     echo "Copy the URL below to your GitHub Webhook settings:"
