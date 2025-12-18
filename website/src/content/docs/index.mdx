@@ -1,0 +1,93 @@
+---
+title: TRIGRA
+description: Simple, Lightweight GitOps for Any Kubernetes Cluster
+template: splash
+hero:
+  tagline: Deploy to Kubernetes with Git. Simple, Fast, Reliable.
+  image:
+    file: ../../assets/logo-dark.svg
+  actions:
+    - text: Get Started
+      link: /getting-started/quickstart/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/Taiwrash/trigra
+      icon: external
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## ⚡ One Command Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
+```
+
+## Why TRIGRA?
+
+<CardGrid stagger>
+  <Card title="🚀 Universal Support" icon="rocket">
+    Deploy any Kubernetes resource - Deployments, Services, ConfigMaps, Secrets, and more.
+  </Card>
+  <Card title="🏠 Homelab Ready" icon="laptop">
+    Optimized for multi-node homelab clusters with built-in HA support.
+  </Card>
+  <Card title="⚡ Auto-Detect" icon="setting">
+    Automatically detects in-cluster vs out-of-cluster mode.
+  </Card>
+  <Card title="🔒 Secure" icon="approve-check">
+    Webhook validation, RBAC, and secret management built-in.
+  </Card>
+  <Card title="📦 Helm Chart" icon="document">
+    Full Helm chart with customizable values for easy deployment.
+  </Card>
+  <Card title="🎯 GitOps Native" icon="pencil">
+    Edit YAML, commit to Git, watch it deploy automatically.
+  </Card>
+</CardGrid>
+
+## Ready-to-Deploy Examples
+
+<CardGrid>
+  <LinkCard
+    title="📊 Homepage Dashboard"
+    description="Beautiful dashboard to manage all your homelab services"
+    href="/guides/deploy-examples#homepage-dashboard"
+  />
+  <LinkCard
+    title="🤖 Ollama AI Models"
+    description="Run local LLMs (Llama, Gemma, Mistral) on your cluster"
+    href="/guides/deploy-examples#ollama-ai"
+  />
+  <LinkCard
+    title="✨ Awesome Homepage"
+    description="Stunning homepage with animations and glassmorphism"
+    href="/guides/deploy-examples#awesome-homepage"
+  />
+</CardGrid>
+
+## Quick Links
+
+<CardGrid>
+  <LinkCard
+    title="Installation Guide"
+    description="Multiple ways to install TRIGRA"
+    href="/getting-started/installation/"
+  />
+  <LinkCard
+    title="GitHub Webhooks"
+    description="Set up automated deployments"
+    href="/guides/github-webhooks/"
+  />
+  <LinkCard
+    title="Cloudflare Tunnel"
+    description="Expose your cluster securely"
+    href="/guides/cloudflare-tunnel/"
+  />
+  <LinkCard
+    title="Configuration"
+    description="Customize TRIGRA for your needs"
+    href="/configuration/helm-values/"
+  />
+</CardGrid>

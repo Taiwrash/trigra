@@ -1,0 +1,163 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+---
+
+<footer class="trigra-footer">
+  <div class="footer-content">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">⚡</div>
+        <div class="footer-title">TRIGRA</div>
+      </div>
+      <p class="footer-tagline">Lightweight GitOps for Kubernetes</p>
+    </div>
+    
+    <div class="footer-links">
+      <div class="footer-column">
+        <h4>Documentation</h4>
+        <a href="/getting-started/introduction/">Introduction</a>
+        <a href="/getting-started/quickstart/">Quick Start</a>
+        <a href="/getting-started/installation/">Installation</a>
+      </div>
+      
+      <div class="footer-column">
+        <h4>Guides</h4>
+        <a href="/guides/github-webhooks/">GitHub Webhooks</a>
+        <a href="/guides/cloudflare-tunnel/">Cloudflare Tunnel</a>
+        <a href="/guides/deploy-examples/">Deploy Examples</a>
+      </div>
+      
+      <div class="footer-column">
+        <h4>Community</h4>
+        <a href="https://github.com/Taiwrash/trigra" target="_blank">GitHub</a>
+        <a href="https://github.com/Taiwrash/trigra/issues" target="_blank">Issues</a>
+        <a href="https://github.com/Taiwrash/trigra/discussions" target="_blank">Discussions</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <p>Built with ❤️ for Kubernetes enthusiasts</p>
+    <p class="footer-copy">© {new Date().getFullYear()} TRIGRA • MIT License</p>
+  </div>
+</footer>
+
+<style>
+  .trigra-footer {
+    background: linear-gradient(180deg, #030b05 0%, #051209 100%);
+    border-top: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 3rem 2rem 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 3rem;
+  }
+
+  .footer-main {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .footer-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+
+  .footer-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .footer-tagline {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+  }
+
+  .footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 150px;
+  }
+
+  .footer-column h4 {
+    color: #f1f5f9;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-column a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+
+  .footer-column a:hover {
+    color: #10b981;
+  }
+
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 2rem auto 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(16, 185, 129, 0.1);
+    text-align: center;
+  }
+
+  .footer-bottom p {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+  }
+
+  .footer-copy {
+    color: #475569 !important;
+    font-size: 0.8rem !important;
+  }
+
+  @media (max-width: 768px) {
+    .footer-content {
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .footer-links {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  }
+</style>
