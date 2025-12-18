@@ -61,6 +61,10 @@ Edit `index.html` to customize:
 
 The page displays:
 ```bash
+# MAKE SURE THERE IS KUBERNETES AND KUBECTL IS INSTALLED BEFORE RUNNING THIS COMMAND
+# THIS WILL INSTALL TRIGRA IN DEFAULT NAMESPACE
+# IF YOU WANT TO INSTALL IN A DIFFERENT NAMESPACE, RUN THE FOLLOWING COMMAND
+# curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/install.sh | bash -s -- <namespace>
 curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/install.sh | bash
 ```
 
