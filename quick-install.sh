@@ -209,6 +209,6 @@ echo " "
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "${YELLOW}Starting Cloudflare Tunnel...${NC}"
     echo "Copy the URL below to your GitHub Webhook settings:"
-    cloudflared tunnel --url http://${SERVICE_IP}:${PORT}
+    cloudflared tunnel --url http://${SERVICE_IP}:${PORT} 2>&1 | grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | sed 's|$|/webhook|'
 fi
 
