@@ -200,15 +200,41 @@ install_cloudflared
 
 echo ""
 echo -e "${GREEN}Next Steps:${NC}"
-echo "1. Configure GitHub webhook with the URL above"
-echo "2. run 'cloudflared tunnel --url http://${SERVICE_IP}:${PORT}' to expose your service securely"
- 
-echo -e "${YELLOW}Starting Cloudflare Tunnel...${NC}"
+echo "1. Configure GitHub webhook with the URL below"
 echo ""
+echo -e "${YELLOW}Starting Cloudflare Tunnel as background service...${NC}"
 
-# Extract and display URL in a styled box
-cloudflared tunnel --url http://${SERVICE_IP}:${PORT} 2>&1 | grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | while read -r URL; do
-    WEBHOOK_URL="${URL}/webhook"
+# Create log file for cloudflared
+CLOUDFLARED_LOG="/tmp/cloudflared-trigra.log"
+CLOUDFLARED_PID_FILE="/tmp/cloudflared-trigra.pid"
+
+# Kill any existing tunnel
+if [ -f "$CLOUDFLARED_PID_FILE" ]; then
+    OLD_PID=$(cat "$CLOUDFLARED_PID_FILE")
+    kill "$OLD_PID" 2>/dev/null || true
+    rm -f "$CLOUDFLARED_PID_FILE"
+fi
+
+# Start cloudflared in background
+nohup cloudflared tunnel --url http://${SERVICE_IP}:${PORT} > "$CLOUDFLARED_LOG" 2>&1 &
+CLOUDFLARED_PID=$!
+echo "$CLOUDFLARED_PID" > "$CLOUDFLARED_PID_FILE"
+
+# Wait for URL to be generated (max 30 seconds)
+echo -e "${YELLOW}Waiting for tunnel URL...${NC}"
+WEBHOOK_URL=""
+for i in {1..30}; do
+    if [ -f "$CLOUDFLARED_LOG" ]; then
+        URL=$(grep -o 'https://[-a-z0-9]*\.trycloudflare\.com' "$CLOUDFLARED_LOG" 2>/dev/null | head -1)
+        if [ -n "$URL" ]; then
+            WEBHOOK_URL="${URL}/webhook"
+            break
+        fi
+    fi
+    sleep 1
+done
+
+if [ -n "$WEBHOOK_URL" ]; then
     echo ""
     echo -e "${GREEN}╔══════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║${NC}  ${YELLOW}🔗 YOUR WEBHOOK URL (copy this to GitHub):${NC}                     ${GREEN}║${NC}"
@@ -218,8 +244,14 @@ cloudflared tunnel --url http://${SERVICE_IP}:${PORT} 2>&1 | grep --line-buffere
     echo -e "${GREEN}║${NC}                                                                  ${GREEN}║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${YELLOW}⚠️  Keep this terminal open to maintain the tunnel${NC}"
-    echo -e "${YELLOW}    Press Ctrl+C to stop the tunnel${NC}"
-done
-
+    echo -e "${GREEN}✓ Tunnel running in background (PID: ${CLOUDFLARED_PID})${NC}"
+    echo ""
+    echo -e "${YELLOW}Useful commands:${NC}"
+    echo "  View logs:    tail -f $CLOUDFLARED_LOG"
+    echo "  Stop tunnel:  kill \$(cat $CLOUDFLARED_PID_FILE)"
+    echo ""
+else
+    echo -e "${RED}✗ Failed to get tunnel URL. Check logs: $CLOUDFLARED_LOG${NC}"
+    echo "  You can also run manually: cloudflared tunnel --url http://${SERVICE_IP}:${PORT}"
+fi
 
