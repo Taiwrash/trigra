@@ -203,12 +203,23 @@ echo -e "${GREEN}Next Steps:${NC}"
 echo "1. Configure GitHub webhook with the URL above"
 echo "2. run 'cloudflared tunnel --url http://${SERVICE_IP}:${PORT}' to expose your service securely"
  
+echo -e "${YELLOW}Starting Cloudflare Tunnel...${NC}"
+echo ""
 
-read -p "Do you want to start a temporary Cloudflare Tunnel now? (y/n) " -n 1 -r
+# Extract and display URL in a styled box
+cloudflared tunnel --url http://${SERVICE_IP}:${PORT} 2>&1 | grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | while read -r URL; do
+    WEBHOOK_URL="${URL}/webhook"
+    echo ""
+    echo -e "${GREEN}╔══════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║${NC}  ${YELLOW}🔗 YOUR WEBHOOK URL (copy this to GitHub):${NC}                     ${GREEN}║${NC}"
+    echo -e "${GREEN}╠══════════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}║${NC}                                                                  ${GREEN}║${NC}"
+    echo -e "${GREEN}║${NC}  \033[1;36m${WEBHOOK_URL}\033[0m"
+    echo -e "${GREEN}║${NC}                                                                  ${GREEN}║${NC}"
+    echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}⚠️  Keep this terminal open to maintain the tunnel${NC}"
+    echo -e "${YELLOW}    Press Ctrl+C to stop the tunnel${NC}"
+done
 
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}Starting Cloudflare Tunnel...${NC}"
-    echo "Copy the URL below to your GitHub Webhook settings:"
-    cloudflared tunnel --url http://${SERVICE_IP}:${PORT} 2>&1 | grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | sed 's|$|/webhook|'
-fi
 
