@@ -85,4 +85,4 @@ TRIGRA uses HMAC-SHA256 to verify webhook authenticity.
 ### Webhook Times Out
 
 - **Cause**: TRIGRA not accessible externally
-- **Fix**: Use [Cloudflare Tunnel](/guides/cloudflare-tunnel/) or verify network access
+- **Fix**: Use [Cloudflare Tunnel](/trigra/guides/cloudflare-tunnel/) or verify network access

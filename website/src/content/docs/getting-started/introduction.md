@@ -71,4 +71,4 @@ See your changes deployed immediately:
 
 ## Next Steps
 
-Ready to get started? Head to the [Quick Start](/getting-started/quickstart/) guide to deploy TRIGRA in under 5 minutes.
+Ready to get started? Head to the [Quick Start](/trigra/getting-started/quickstart/) guide to deploy TRIGRA in under 5 minutes.

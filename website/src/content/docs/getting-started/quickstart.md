@@ -113,7 +113,7 @@ kubectl logs -f deployment/trigra
 
 ## Next Steps
 
-- 📖 Read the full [Installation Guide](/getting-started/installation/) for more options
-- 🔗 Learn about [GitHub Webhooks](/guides/github-webhooks/) configuration
-- 🌐 Set up [Cloudflare Tunnel](/guides/cloudflare-tunnel/) for external access
-- 📦 Deploy [pre-built examples](/guides/deploy-examples/)
+- 📖 Read the full [Installation Guide](/trigra/getting-started/installation/) for more options
+- 🔗 Learn about [GitHub Webhooks](/trigra/guides/github-webhooks/) configuration
+- 🌐 Set up [Cloudflare Tunnel](/trigra/guides/cloudflare-tunnel/) for external access
+- 📦 Deploy [pre-built examples](/trigra/guides/deploy-examples/)
