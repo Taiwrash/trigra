@@ -19,6 +19,9 @@ type Config struct {
 	// Kubernetes configuration
 	InCluster bool
 	Namespace string
+
+	// Generic Git configuration
+	GitRepoURL string
 }
 
 // Load reads configuration from environment variables
@@ -29,6 +32,7 @@ func Load() (*Config, error) {
 		WebhookSecret: os.Getenv("WEBHOOK_SECRET"),
 		ServerPort:    8082, // default
 		Namespace:     getEnvOrDefault("NAMESPACE", "default"),
+		GitRepoURL:    os.Getenv("GIT_REPO_URL"),
 	}
 
 	// Parse server port if provided

@@ -13,6 +13,8 @@ import (
 	"github.com/Taiwrash/trigra/internal/config"
 	"github.com/Taiwrash/trigra/internal/k8s"
 	"github.com/Taiwrash/trigra/internal/providers"
+	"github.com/Taiwrash/trigra/internal/providers/bitbucket"
+	"github.com/Taiwrash/trigra/internal/providers/git"
 	"github.com/Taiwrash/trigra/internal/providers/github"
 	"github.com/Taiwrash/trigra/internal/providers/gitlab"
 	"github.com/Taiwrash/trigra/internal/webhook"
@@ -46,6 +48,10 @@ func main() {
 		provider = github.NewGitHubProvider(cfg.GitToken)
 	case "gitlab":
 		provider = gitlab.NewGitLabProvider(cfg.GitToken)
+	case "bitbucket":
+		provider = bitbucket.NewBitbucketProvider(os.Getenv("BITBUCKET_USER"), cfg.GitToken)
+	case "git":
+		provider = git.NewGenericGitProvider(cfg.GitRepoURL)
 	default:
 		log.Fatalf("Unsupported git provider: %s", cfg.GitProvider)
 	}

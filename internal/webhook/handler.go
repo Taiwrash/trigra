@@ -118,6 +118,9 @@ func (h *Handler) processFile(ctx context.Context, event *providers.PushEvent, f
 func (h *Handler) filterYAMLFiles(files []string) []string {
 	yamlFiles := []string{}
 	for _, file := range files {
+		if file == "." {
+			return []string{"."} // Special case for full repo scan
+		}
 		if strings.HasSuffix(strings.ToLower(file), ".yaml") ||
 			strings.HasSuffix(strings.ToLower(file), ".yml") {
 			yamlFiles = append(yamlFiles, file)
