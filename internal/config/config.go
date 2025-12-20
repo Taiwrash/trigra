@@ -22,6 +22,7 @@ type Config struct {
 
 	// Generic Git configuration
 	GitRepoURL string
+	GitBaseURL string
 }
 
 // Load reads configuration from environment variables
@@ -33,6 +34,7 @@ func Load() (*Config, error) {
 		ServerPort:    8082, // default
 		Namespace:     getEnvOrDefault("NAMESPACE", "default"),
 		GitRepoURL:    os.Getenv("GIT_REPO_URL"),
+		GitBaseURL:    os.Getenv("GIT_BASE_URL"),
 	}
 
 	// Parse server port if provided

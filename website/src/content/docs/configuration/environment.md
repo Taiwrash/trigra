@@ -31,14 +31,22 @@ TRIGRA can be configured using environment variables, which are set via Kubernet
 The Git provider where your manifests are stored.
 - `github` (default): Native GitHub API support.
 - `gitlab`: Native GitLab API support.
+- `gitea`: Native Gitea / Forgejo support. Works well with homelabs.
 - `bitbucket`: Bitbucket Cloud support. Requires `BITBUCKET_USER`.
 - `git`: Generic Git support using local cloning. Requires `GIT_REPO_URL`.
+
+### GIT_BASE_URL
+
+Optional for GitHub. Required for **on-premise** instances:
+- **Gitea**: e.g., `https://gitea.local`
+- **GitLab Self-Managed**: e.g., `https://gitlab.mycompany.com`
 
 ### GIT_TOKEN
 
 **Recommended.** API token for the provider.
-- **GitHub**: Personal Access Token (classic or fine-grained).
-- **GitLab**: Personal Access Token or Project Access Token.
+- **GitHub**: Personal Access Token.
+- **GitLab**: Personal or Project Access Token.
+- **Gitea**: Settings -> Applications -> Tokens.
 - **Bitbucket**: App Password.
 
 ### GIT_REPO_URL
