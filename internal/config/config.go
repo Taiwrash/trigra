@@ -8,9 +8,10 @@ import (
 
 // Config holds all configuration for the GitOps controller
 type Config struct {
-	// GitHub configuration
-	GitHubToken   string
-	WebhookSecret string
+	// Git provider configuration
+	GitProvider   string // "github", "gitlab", etc.
+	GitToken      string // Token for the git provider API
+	WebhookSecret string // Secret to validate webhooks
 
 	// Server configuration
 	ServerPort int
@@ -23,7 +24,8 @@ type Config struct {
 // Load reads configuration from environment variables
 func Load() (*Config, error) {
 	cfg := &Config{
-		GitHubToken:   os.Getenv("GITHUB_TOKEN"),
+		GitProvider:   getEnvOrDefault("GIT_PROVIDER", "github"),
+		GitToken:      getEnvOrDefault("GIT_TOKEN", os.Getenv("GITHUB_TOKEN")),
 		WebhookSecret: os.Getenv("WEBHOOK_SECRET"),
 		ServerPort:    8082, // default
 		Namespace:     getEnvOrDefault("NAMESPACE", "default"),
@@ -55,9 +57,9 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("WEBHOOK_SECRET is required")
 	}
 
-	// GitHub token is optional for public repos, but recommended
-	if cfg.GitHubToken == "" {
-		fmt.Println("WARNING: GITHUB_TOKEN not set. Rate limits will be lower for GitHub API.")
+	// Git token is optional for some public repos, but recommended
+	if cfg.GitToken == "" {
+		fmt.Printf("WARNING: GIT_TOKEN not set for provider %s. API access might be restricted.\n", cfg.GitProvider)
 	}
 
 	return nil

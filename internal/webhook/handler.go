@@ -3,89 +3,78 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/Taiwrash/trigra/internal/k8s"
-	"github.com/google/go-github/v79/github"
+	"github.com/Taiwrash/trigra/internal/providers"
 )
 
-// Handler handles GitHub webhook events
+// Handler handles Git provider webhook events using various providers
 type Handler struct {
 	applier       *k8s.Applier
-	githubClient  *github.Client
+	provider      providers.Provider
 	webhookSecret string
 	namespace     string
 }
 
-// NewHandler creates a new webhook handler
-func NewHandler(applier *k8s.Applier, githubClient *github.Client, webhookSecret, namespace string) *Handler {
+// NewHandler creates a new agnostic webhook handler
+func NewHandler(applier *k8s.Applier, provider providers.Provider, webhookSecret, namespace string) *Handler {
 	return &Handler{
 		applier:       applier,
-		githubClient:  githubClient,
+		provider:      provider,
 		webhookSecret: webhookSecret,
 		namespace:     namespace,
 	}
 }
 
-// ServeHTTP handles incoming webhook requests
+// ServeHTTP handles incoming webhook requests from any supported provider
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	// Validate webhook payload
-	payload, err := github.ValidatePayload(r, []byte(h.webhookSecret))
+	log.Printf("INFO: Received webhook request for provider: %s", h.provider.Name())
+
+	// 1. Validate webhook payload
+	payload, err := h.provider.Validate(r, h.webhookSecret)
 	if err != nil {
-		log.Printf("ERROR: Invalid webhook payload: %v", err)
+		log.Printf("ERROR: Invalid webhook payload for %s: %v", h.provider.Name(), err)
 		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
 	}
 
-	// Parse webhook event
-	event, err := github.ParseWebHook(github.WebHookType(r), payload)
+	// 2. Parse push event
+	event, err := h.provider.ParsePushEvent(r, payload)
 	if err != nil {
-		log.Printf("ERROR: Failed to parse webhook: %v", err)
-		http.Error(w, "Failed to parse webhook", http.StatusBadRequest)
+		// Some events like 'ping' might not be push events. Check headers if needed,
+		// but for now we follow the generic push event flow.
+		log.Printf("WARNING: Generic parsing failed or non-push event: %v", err)
+		// We can return 200 for health checks/pings that aren't push events
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Event received but not processed (non-push)")
 		return
 	}
 
-	// Handle different event types
-	switch e := event.(type) {
-	case *github.PingEvent:
-		log.Printf("INFO: Received ping event from webhook")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "pong")
-		return
-
-	case *github.PushEvent:
-		if err := h.handlePushEvent(ctx, e); err != nil {
-			log.Printf("ERROR: Failed to handle push event: %v", err)
-			http.Error(w, fmt.Sprintf("Failed to process push: %v", err), http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Successfully processed push event")
-		return
-
-	default:
-		log.Printf("WARNING: Unhandled webhook event type: %T", event)
-		http.Error(w, "Event type not supported", http.StatusNotImplemented)
+	// 3. Handle push event
+	if err := h.handlePushEvent(ctx, event); err != nil {
+		log.Printf("ERROR: Failed to handle push event: %v", err)
+		http.Error(w, fmt.Sprintf("Failed to process push: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Successfully processed %s push event", h.provider.Name())
 }
 
-// handlePushEvent processes a GitHub push event
-func (h *Handler) handlePushEvent(ctx context.Context, event *github.PushEvent) error {
-	log.Printf("INFO: Processing push event from %s/%s",
-		event.Repo.GetOwner().GetName(),
-		event.Repo.GetName())
-
-	// Get all modified/added files from commits
-	files := h.getModifiedFiles(event.Commits)
+// handlePushEvent processes the generic push event
+func (h *Handler) handlePushEvent(ctx context.Context, event *providers.PushEvent) error {
+	log.Printf("INFO: Processing push event from %s/%s on ref %s",
+		event.Owner,
+		event.Repo,
+		event.Ref)
 
 	// Filter for YAML files only
-	yamlFiles := h.filterYAMLFiles(files)
+	yamlFiles := h.filterYAMLFiles(event.ModifiedFiles)
 
 	if len(yamlFiles) == 0 {
 		log.Printf("INFO: No YAML files found in push event")
@@ -104,29 +93,14 @@ func (h *Handler) handlePushEvent(ctx context.Context, event *github.PushEvent) 
 	return nil
 }
 
-// processFile downloads and applies a single YAML file
-func (h *Handler) processFile(ctx context.Context, event *github.PushEvent, filename string) error {
+// processFile downloads and applies a single YAML file using the provider
+func (h *Handler) processFile(ctx context.Context, event *providers.PushEvent, filename string) error {
 	log.Printf("INFO: Downloading file: %s", filename)
 
-	// Download file content from GitHub
-	fileReader, _, err := h.githubClient.Repositories.DownloadContents(
-		ctx,
-		event.Repo.GetOwner().GetName(),
-		event.Repo.GetName(),
-		filename,
-		&github.RepositoryContentGetOptions{
-			Ref: event.GetAfter(), // Use the commit SHA
-		},
-	)
+	// Download file content via provider
+	content, err := h.provider.DownloadFile(ctx, event.Owner, event.Repo, event.After, filename)
 	if err != nil {
 		return fmt.Errorf("failed to download file: %w", err)
-	}
-	defer fileReader.Close()
-
-	// Read file content
-	content, err := io.ReadAll(fileReader)
-	if err != nil {
-		return fmt.Errorf("failed to read file content: %w", err)
 	}
 
 	log.Printf("INFO: Applying resources from file: %s", filename)
@@ -140,41 +114,14 @@ func (h *Handler) processFile(ctx context.Context, event *github.PushEvent, file
 	return nil
 }
 
-// getModifiedFiles extracts all modified and added files from commits
-func (h *Handler) getModifiedFiles(commits []*github.HeadCommit) []string {
-	fileSet := make(map[string]bool)
-
-	for _, commit := range commits {
-		// Add all added files
-		for _, file := range commit.Added {
-			fileSet[file] = true
-		}
-
-		// Add all modified files
-		for _, file := range commit.Modified {
-			fileSet[file] = true
-		}
-	}
-
-	// Convert set to slice
-	files := make([]string, 0, len(fileSet))
-	for file := range fileSet {
-		files = append(files, file)
-	}
-
-	return files
-}
-
 // filterYAMLFiles returns only YAML/YML files from the list
 func (h *Handler) filterYAMLFiles(files []string) []string {
 	yamlFiles := []string{}
-
 	for _, file := range files {
 		if strings.HasSuffix(strings.ToLower(file), ".yaml") ||
 			strings.HasSuffix(strings.ToLower(file), ".yml") {
 			yamlFiles = append(yamlFiles, file)
 		}
 	}
-
 	return yamlFiles
 }

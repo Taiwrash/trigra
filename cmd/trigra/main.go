@@ -12,8 +12,10 @@ import (
 
 	"github.com/Taiwrash/trigra/internal/config"
 	"github.com/Taiwrash/trigra/internal/k8s"
+	"github.com/Taiwrash/trigra/internal/providers"
+	"github.com/Taiwrash/trigra/internal/providers/github"
+	"github.com/Taiwrash/trigra/internal/providers/gitlab"
 	"github.com/Taiwrash/trigra/internal/webhook"
-	"github.com/google/go-github/v79/github"
 )
 
 var (
@@ -29,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
-	log.Printf("Configuration loaded: InCluster=%v, Namespace=%s", cfg.InCluster, cfg.Namespace)
+	log.Printf("Configuration loaded: InCluster=%v, Namespace=%s, Provider=%s", cfg.InCluster, cfg.Namespace, cfg.GitProvider)
 
 	// 2. Initialize Kubernetes Applier
 	applier, err := k8s.NewApplier(cfg.InCluster)
@@ -37,16 +39,19 @@ func main() {
 		log.Fatalf("Failed to initialize Kubernetes applier: %v", err)
 	}
 
-	// 3. Initialize GitHub Client
-	var client *github.Client
-	if cfg.GitHubToken != "" {
-		client = github.NewClient(nil).WithAuthToken(cfg.GitHubToken)
-	} else {
-		client = github.NewClient(nil)
+	// 3. Initialize Git Provider
+	var provider providers.Provider
+	switch cfg.GitProvider {
+	case "github":
+		provider = github.NewGitHubProvider(cfg.GitToken)
+	case "gitlab":
+		provider = gitlab.NewGitLabProvider(cfg.GitToken)
+	default:
+		log.Fatalf("Unsupported git provider: %s", cfg.GitProvider)
 	}
 
 	// 4. Initialize Webhook Handler
-	handler := webhook.NewHandler(applier, client, cfg.WebhookSecret, cfg.Namespace)
+	handler := webhook.NewHandler(applier, provider, cfg.WebhookSecret, cfg.Namespace)
 
 	// 5. Start Server
 	server := &http.Server{
