@@ -53,7 +53,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "chore: update image tag for deployment [skip ci]"
-            git push
+            git push origin HEAD:main
           fi
 
       - name: Verify Build
