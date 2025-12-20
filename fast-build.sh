@@ -4,7 +4,7 @@
 
 set -e
 
-IMAGE_NAME="taiwrash/trigra"
+IMAGE_NAME="${IMAGE_NAME:-taiwrash/trigra}"
 # Generate a timestamp-based tag
 TAG="v$(date +%Y%m%d-%H%M%S)"
 
@@ -12,6 +12,9 @@ echo "🚀 Fast Multi-Platform Build"
 echo "=============================="
 echo "🏷️  Tag: $TAG"
 echo ""
+
+# Ensure bin directory exists
+mkdir -p bin
 
 # Build for AMD64 (Linux servers)
 echo "📦 Building AMD64 binary..."
