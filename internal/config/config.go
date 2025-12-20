@@ -26,6 +26,8 @@ type Config struct {
 	GitBaseURL    string
 	GitSSHKeyFile string // Path to SSH private key
 	PublicURL     string // The public URL where Trigra is reachable
+	GitOwner      string // Repository owner/org
+	GitRepo       string // Repository name
 }
 
 // Load reads configuration from environment variables.
@@ -40,6 +42,8 @@ func Load() (*Config, error) {
 		GitBaseURL:    os.Getenv("GIT_BASE_URL"),
 		GitSSHKeyFile: os.Getenv("GIT_SSH_KEY_FILE"),
 		PublicURL:     os.Getenv("PUBLIC_URL"),
+		GitOwner:      os.Getenv("GIT_OWNER"),
+		GitRepo:       os.Getenv("GIT_REPO"),
 	}
 
 	// Parse server port if provided

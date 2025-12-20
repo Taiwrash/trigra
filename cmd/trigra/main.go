@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -62,10 +63,15 @@ func main() {
 		log.Fatalf("Unsupported git provider: %s", cfg.GitProvider)
 	}
 
-	// 4. Initialize Webhook Handler
+	// 4. Automated Webhook Setup
+	if cfg.PublicURL != "" {
+		setupWebhooks(cfg, provider)
+	}
+
+	// 5. Initialize Webhook Handler
 	handler := webhook.NewHandler(applier, provider, cfg.WebhookSecret, cfg.Namespace)
 
-	// 5. Start Server
+	// 6. Start Server
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.ServerPort),
 		Handler:           nil,             // Use DefaultServeMux
@@ -112,4 +118,40 @@ func main() {
 	}
 
 	log.Println("Server exiting")
+}
+
+func setupWebhooks(cfg *config.Config, p providers.Provider) {
+	owner := cfg.GitOwner
+	repo := cfg.GitRepo
+
+	// Try to auto-parse if missing
+	if (owner == "" || repo == "") && cfg.GitRepoURL != "" {
+		parts := strings.Split(strings.TrimSuffix(cfg.GitRepoURL, ".git"), "/")
+		if len(parts) >= 2 {
+			repo = parts[len(parts)-1]
+			owner = parts[len(parts)-2]
+			// Handle SSH URLs like git@github.com:owner/repo
+			if strings.Contains(owner, ":") {
+				ownerParts := strings.Split(owner, ":")
+				owner = ownerParts[len(ownerParts)-1]
+			}
+		}
+	}
+
+	if owner == "" || repo == "" {
+		log.Printf("WARNING: Automated webhook setup skipped - could not determine owner/repo")
+		return
+	}
+
+	webhookURL := fmt.Sprintf("%s/webhook", strings.TrimSuffix(cfg.PublicURL, "/"))
+	log.Printf("INFO: Attempting to configure webhook for %s/%s at %s", owner, repo, webhookURL)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := p.SetupWebhook(ctx, owner, repo, webhookURL, cfg.WebhookSecret); err != nil {
+		log.Printf("WARNING: Automated webhook setup failed: %v", err)
+	} else {
+		log.Printf("SUCCESS: Webhook ensured for %s/%s", owner, repo)
+	}
 }
