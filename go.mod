@@ -1,8 +1,9 @@
 module github.com/Taiwrash/trigra
 
-go 1.25.4
+go 1.24.0
 
 require (
+	code.gitea.io/sdk/gitea v0.22.1
 	github.com/go-git/go-git/v5 v5.16.4
 	github.com/google/go-github/v79 v79.0.0
 	github.com/ktrysmt/go-bitbucket v0.9.88
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	code.gitea.io/sdk/gitea v0.22.1 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/42wim/httpsig v1.2.3 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
