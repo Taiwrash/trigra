@@ -18,18 +18,23 @@ spec:
       serviceAccountName: trigra
       containers:
       - name: trigra
-        image: taiwrash/trigra:v20251217-140050
+        image: taiwrash/trigra:latest
         imagePullPolicy: Always
         ports:
         - name: http
           containerPort: 8082
           protocol: TCP
         env:
-        - name: GITHUB_TOKEN
+        - name: GIT_PROVIDER
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: GIT_PROVIDER
+        - name: GIT_TOKEN
           valueFrom:
             secretKeyRef:
               name: trigra-secret
-              key: GITHUB_TOKEN
+              key: GIT_TOKEN
         - name: WEBHOOK_SECRET
           valueFrom:
             secretKeyRef:
@@ -38,7 +43,10 @@ spec:
         - name: SERVER_PORT
           value: "8082"
         - name: NAMESPACE
-          value: "default"
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: NAMESPACE
         livenessProbe:
           httpGet:
             path: /health

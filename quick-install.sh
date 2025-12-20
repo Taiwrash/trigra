@@ -18,8 +18,10 @@ echo -e "${GREEN}╚════════════════════
 echo ""
 
 # Parse arguments
-NAMESPACE="$1"
+NAMESPACE="${1:-default}"
 WEBHOOK_SECRET="$2"
+GIT_TOKEN="${3:-$GIT_TOKEN}" # Use $GIT_TOKEN if arg not provided
+GIT_PROVIDER="${GIT_PROVIDER:-github}"
 
 # Generate webhook secret if not provided
 if [ -z "$WEBHOOK_SECRET" ]; then
@@ -33,7 +35,10 @@ if [ -z "$WEBHOOK_SECRET" ]; then
     echo -e "${GREEN}Generated webhook secret ${NC}"
 fi
 
-GITHUB_TOKEN="${3:-}"
+# Backward compatibility for GITHUB_TOKEN
+if [ -n "$GITHUB_TOKEN" ] && [ -z "$GIT_TOKEN" ]; then
+    GIT_TOKEN="$GITHUB_TOKEN"
+fi
 
 # Check kubectl
 if ! command -v kubectl &> /dev/null; then
@@ -51,6 +56,7 @@ echo -e "${GREEN}✓ Connected to cluster${NC}"
 
 echo ""
 echo -e "${YELLOW}Installing to namespace: ${NAMESPACE}${NC}"
+echo -e "${YELLOW}Git Provider: ${GIT_PROVIDER}${NC}"
 
 # Create namespace
 kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f - 2>/dev/null || true
@@ -83,11 +89,17 @@ download_file "https://raw.githubusercontent.com/Taiwrash/trigra/main/deployment
 echo "Applying RBAC..."
 kubectl apply -f "${TEMP_DIR}/rbac.yaml"
 
-# Create secret
-echo "Creating secret..."
+# Create config and secret
+echo "Creating configuration..."
 kubectl create secret generic trigra-secret \
-    --from-literal=GITHUB_TOKEN="$GITHUB_TOKEN" \
+    --from-literal=GIT_TOKEN="$GIT_TOKEN" \
     --from-literal=WEBHOOK_SECRET="$WEBHOOK_SECRET" \
+    --namespace="$NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create configmap trigra-config \
+    --from-literal=GIT_PROVIDER="$GIT_PROVIDER" \
+    --from-literal=NAMESPACE="$NAMESPACE" \
     --namespace="$NAMESPACE" \
     --dry-run=client -o yaml | kubectl apply -f -
 
