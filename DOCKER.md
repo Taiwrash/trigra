@@ -1,6 +1,6 @@
-# TRIGRA Docker Image
+# Trigra Docker Image
 
-Production-ready Docker image for TRIGRA (Kubernetes GitOps Homelab) available on Docker Hub.
+Official multi-platform Docker images for Trigra (Kubernetes GitOps Controller) are available on Docker Hub.
 
 ## Quick Start
 
@@ -8,105 +8,68 @@ Production-ready Docker image for TRIGRA (Kubernetes GitOps Homelab) available o
 docker pull taiwrash/trigra:latest
 ```
 
-## Available Tags
+## Supported Architectures
 
-- `latest` - Latest stable release
-- `1.0.0` - Specific version
+We provide official images for:
+- 💻 **AMD64**: Standard x86_64 servers (Cloud, VPS, etc.)
+- 🍓 **ARM64**: Raspberry Pi, Apple Silicon (M1/M2/M3), and ARM-based cloud instances.
+
+Trigra uses Docker Manifests, so simply pulling `taiwrash/trigra:latest` will automatically provide the correct architecture for your system.
 
 ## Running Locally
 
-### With Kubeconfig (Local Development)
+### With Kubeconfig (Development)
+
+To test Trigra locally against your cluster:
 
 ```bash
 docker run -p 8082:8082 \
   -v $HOME/.kube/config:/app/.kube/config:ro \
   -e KUBECONFIG=/app/.kube/config \
-  -e WEBHOOK_SECRET=your-secret \
-  -e GITHUB_TOKEN=your-token \
+  -e WEBHOOK_SECRET=myhooksecret \
+  -e GIT_TOKEN=ghp_xxxxxxxx \
   taiwrash/trigra:latest
-```
-
-### In-Cluster (Production)
-
-Deploy to Kubernetes where it will automatically use in-cluster config:
-
-```bash
-kubectl apply -f deployments/kubernetes/
 ```
 
 ## Image Features
 
-✨ **Production Optimized**
-- Multi-stage build for minimal image size
-- Non-root user for security
-- Built-in health checks
-- Optimized binary with stripped symbols
+✨ **Production Ready**
+- **Non-Root Execution**: Runs as UID 1000 for maximum security.
+- **Minimal Footprint**: Built on Alpine Linux, resulting in a ~50MB image.
+- **Self-Healing**: Native health checks ensure the controller is always responsive.
 
-🔒 **Security**
-- Runs as non-root user (UID 1000)
-- Minimal attack surface
-- CA certificates included
-- Timezone data for accurate logging
+🔒 **Identity & Governance**
+- Full OCI metadata labels.
+- Stripped and optimized binaries.
+- Bundled CA certificates for secure API communication.
 
-📊 **Metadata**
-- Full OCI image labels
-- Version information
-- Build timestamp
-- Source repository link
+## Multi-Platform Build
 
-## Building from Source
+To build multi-platform images yourself, use the included `fast-build.sh` script (requires Docker Buildx):
 
 ```bash
-# Build image
-./build-docker.sh
-
-# Build specific version
-./build-docker.sh 1.0.0
-
-# Push to Docker Hub
-docker login
-docker push taiwrash/trigra:latest
+# Builds and pushes AMD64 & ARM64 images + Manifest
+IMAGE_NAME="your/repo" ./fast-build.sh
 ```
 
-## Image Details
-
-- **Base**: Alpine Linux (minimal)
-- **Size**: ~50MB
-- **Architecture**: amd64
-- **Health Check**: HTTP GET /health every 30s
-- **Exposed Port**: 8082
-
-## Usage in Kubernetes
+## Usage in Deployment
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: trigra
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: trigra
-  template:
-    metadata:
-      labels:
-        app: trigra
-    spec:
-      containers:
-      - name: trigra
-        image: taiwrash/trigra:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8082
-        env:
-        - name: WEBHOOK_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: trigra-secret
-              key: webhook-secret
+  containers:
+  - name: trigra
+    image: taiwrash/trigra:latest
+    ports:
+    - containerPort: 8082
+    env:
+    - name: GIT_PROVIDER
+      value: "github"
+    - name: GIT_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: trigra-secret
+          key: GIT_TOKEN
 ```
 
-## Docker Hub
-
-View on Docker Hub: https://hub.docker.com/r/taiwrash/trigra
+---
+View on [Docker Hub](https://hub.docker.com/r/taiwrash/trigra).

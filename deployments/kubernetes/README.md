@@ -1,254 +1,122 @@
-# TRIGRA Kubernetes Deployment Guide
+# Trigra - Kubernetes Deployment Guide
 
-This guide will help you deploy Trigra (Kubernetes GitOps Controller) to your Kubernetes cluster.
+This guide provides detailed instructions for deploying Trigra to your Kubernetes cluster for production use.
 
-## Prerequisites
+## 📋 Prerequisites
 
-- A running Kubernetes cluster
+- A running Kubernetes cluster (K8s 1.25+)
 - `kubectl` configured to access your cluster
-- A GitHub Personal Access Token
-- Your GitHub repository URL
+- API Token for your Git provider (GitHub PAT, GitLab Access Token, Gitea Token, etc.)
 
-## Quick Start
+## 🚀 Quick Deployment
 
-### 1. Create Your Secret
+### 1. Configure Secrets
 
-First, copy the example secret file and configure it with your credentials:
+Copy the example secret and update it with your credentials:
 
 ```bash
-# Download the example secret
-curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/secret.yaml.example
-
-# Copy it to create your actual secret file
-cp secret.yaml.example secret.yaml
+cp deployments/kubernetes/example-secret.yaml deployments/kubernetes/secret.yaml
 ```
 
-Edit `secret.yaml` and replace the placeholder values:
+Update `secret.yaml`:
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
   name: trigra-secret
-  namespace: default
-type: Opaque
 stringData:
-  GITHUB_TOKEN: "ghp_your_actual_token_here"
-  WEBHOOK_SECRET: "your_webhook_secret_generated_with_openssl"
+  GIT_TOKEN: "your_api_token"
+  WEBHOOK_SECRET: "your_webhook_secret"
+  # Required for Private Repos via SSH
+  # GIT_SSH_KEY_FILE: "/etc/trigra/id_rsa" 
 ```
 
-**Important:** Never commit `secret.yaml` to version control!
+### 2. Configure Settings
 
-### 2. Get Your GitHub Token
+Update `deployments/kubernetes/trigra-config.yaml` (or create one):
 
-1. Go to [GitHub Settings > Personal Access Tokens](https://github.com/settings/tokens)
-2. Click "Generate new token (classic)"
-3. Give it a descriptive name (e.g., "Trigra GitOps Controller")
-4. Select scopes:
-   - For **private repositories**: Select `repo` (Full control of private repositories)
-   - For **public repositories**: Select `public_repo` (Access public repositories)
-5. Click "Generate token"
-6. **Copy the token immediately** (you won't be able to see it again!)
-
-### 3. Deploy to Kubernetes
-
-Deploy all components in the correct order:
-
-```bash
-# 1. Create the secret (must be first!)
-kubectl apply -f secret.yaml
-
-# 2. Create RBAC (service account, role, role binding)
-kubectl apply -f rbac.yaml
-
-# 3. Deploy the controller
-kubectl apply -f deployment.yaml
-
-# 4. Create the service (optional, for webhooks)
-kubectl apply -f service.yaml
-```
-
-Or deploy everything at once:
-
-```bash
-kubectl apply -f secret.yaml
-kubectl apply -f .
-```
-
-### 4. Verify Deployment
-
-Check that everything is running:
-
-```bash
-# Check if the pod is running
-kubectl get pods -l app=trigra
-
-# Check the logs
-kubectl logs -l app=trigra -f
-
-# Check the secret was created
-kubectl get secret trigra-secret
-```
-
-You should see output like:
-```
-NAME                   READY   STATUS    RESTARTS   AGE
-trigra-7d8f9b5c4d-x7k2m   1/1     Running   0          30s
-```
-
-## Configuration Options
-
-### Environment Variables (via Secret)
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `GITHUB_TOKEN` | Yes | - | GitHub Personal Access Token |
-| `WEBHOOK_SECRET` | Yes | - | Secret for validating GitHub webhooks |
-| `SERVER_PORT` | No | `8082` | Port for the webhook server |
-| `NAMESPACE` | No | `default` | Kubernetes namespace to deploy resources |
-
-### Deployment Configuration
-
-Edit `deployment.yaml` to customize:
-
-- **Replicas**: Change `replicas: 1` to scale horizontally
-- **Resources**: Adjust CPU/memory limits and requests
-- **Image**: Use a specific version tag instead of `latest`
-- **Namespace**: Deploy to a different namespace
-
-Example:
 ```yaml
-spec:
-  replicas: 2  # Run 2 instances for high availability
-  template:
-    spec:
-      containers:
-      - name: controller
-        image: taiwrash/trigra:v1.0.0  # Use specific version
-        resources:
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trigra-config
+data:
+  GIT_PROVIDER: "github" # Or gitlab, gitea, bitbucket, git
+  NAMESPACE: "default"   # Target namespace for deployments
+  PUBLIC_URL: "https://trigra.example.com" # Required for automated webhooks
 ```
 
-## Troubleshooting
-
-### Pod is not starting
+### 3. Deploy
 
 ```bash
-# Check pod status
-kubectl describe pod -l app=trigra
+# 1. Apply configuration
+kubectl apply -f deployments/kubernetes/trigra-config.yaml
+kubectl apply -f deployments/kubernetes/secret.yaml
 
-# Common issues:
-# - Secret not created: Create secret.yaml first
-# - Image pull error: Check Docker Hub or use a different image tag
-# - RBAC issues: Ensure rbac.yaml is applied
+# 2. Setup RBAC
+kubectl apply -f deployments/kubernetes/rbac.yaml
+
+# 3. Deploy the Controller
+kubectl apply -f deployments/kubernetes/deployment.yaml
+
+# 4. Expose the Webhook Endpoint
+kubectl apply -f deployments/kubernetes/service.yaml
+# Use an Ingress or LoadBalancer to make this reachable at your PUBLIC_URL
 ```
 
-### Controller is not detecting changes
+## 🔐 Advanced Configuration
+
+### SSH Support for Private Repositories
+
+If you are using the `git` provider with a private repository:
+
+1. Create a secret from your SSH private key:
+   ```bash
+   kubectl create secret generic trigra-ssh-key --from-file=id_rsa=/path/to/your/key
+   ```
+
+2. Mount it in `deployment.yaml`:
+   ```yaml
+   spec:
+     template:
+       spec:
+         volumes:
+         - name: ssh-key
+           secret:
+             secretName: trigra-ssh-key
+             defaultMode: 0400
+         containers:
+         - name: trigra
+           volumeMounts:
+           - name: ssh-key
+             mountPath: /etc/trigra
+             readOnly: true
+           env:
+           - name: GIT_SSH_KEY_FILE
+             value: "/etc/trigra/id_rsa"
+   ```
+
+### Automated Webhook Setup
+
+When `PUBLIC_URL` is set, Trigra will attempt to register its webhook endpoint (`$PUBLIC_URL/webhook`) with your Git provider on startup.
+
+Supported providers for auto-registration:
+- **GitHub**: Requires `GIT_TOKEN` with `admin:repo_hook` scope.
+- **GitLab**: Requires `GIT_TOKEN` with `api` scope.
+- **Gitea**: Requires `GIT_TOKEN` permission to manage hooks.
+
+## 🔍 Monitoring & Logs
+
+Verify that Trigra is successfully syncing:
 
 ```bash
-# Check the logs
-kubectl logs -l app=trigra -f
+# Watch logs
+kubectl logs -f deployment/trigra
 
-# Verify your secret values
-kubectl get secret trigra-secret -o yaml
-
-# Common issues:
-# - Invalid GitHub token: Generate a new one
-# - Webhook secret mismatch: Ensure GitHub webhook secret matches WEBHOOK_SECRET
-# - Webhook not configured: Set up webhook in GitHub repository settings
+# Verify sync
+# If you see "SUCCESS: Applied resources", your GitOps flow is working!
 ```
 
-### Authentication errors
-
-```bash
-# Check if token has correct permissions
-# Token needs 'repo' scope for private repos or 'public_repo' for public repos
-
-# Recreate the secret with correct token
-kubectl delete secret trigra-secret
-kubectl apply -f secret.yaml
-kubectl rollout restart deployment trigra
-```
-
-## Updating the Deployment
-
-### Update Configuration
-
-```bash
-# Edit your secret
-vim secret.yaml
-
-# Apply changes
-kubectl apply -f secret.yaml
-
-# Restart the deployment to pick up new values
-kubectl rollout restart deployment trigra
-```
-
-### Update to New Version
-
-```bash
-# Update the image tag in deployment.yaml
-kubectl set image deployment/trigra trigra=taiwrash/trigra:v1.1.0
-
-# Or edit deployment.yaml and apply
-kubectl apply -f deployment.yaml
-```
-
-## Uninstalling
-
-To remove Trigra from your cluster:
-
-```bash
-# Delete all resources
-kubectl delete -f .
-
-# Or delete individually
-kubectl delete deployment trigra
-kubectl delete service trigra
-kubectl delete secret trigra-secret
-kubectl delete serviceaccount trigra
-kubectl delete role trigra-role
-kubectl delete rolebinding trigra-rolebinding
-```
-
-## Security Best Practices
-
-1. **Never commit secrets**: Always keep `secret.yaml` in `.gitignore`
-2. **Use least privilege**: Only grant necessary GitHub token scopes
-3. **Rotate tokens regularly**: Generate new tokens periodically
-4. **Use namespaces**: Deploy to a dedicated namespace for isolation
-5. **Limit RBAC**: Review `rbac.yaml` and restrict permissions as needed
-6. **Use specific image tags**: Avoid `latest` in production
-
-## Getting the Manifests
-
-If you don't have access to the codebase, download the manifests directly:
-
-```bash
-# Create a directory
-mkdir trigra-deployment
-cd trigra-deployment
-
-# Download all manifests
-curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/secret.yaml.example
-curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/deployment.yaml
-curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/rbac.yaml
-curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/service.yaml
-
-# Create your secret
-cp secret.yaml.example secret.yaml
-vim secret.yaml  # Edit with your values
-```
-
-## Support
-
-For issues or questions:
-- Check the logs: `kubectl logs -l app=trigra -f`
-- Review this guide's troubleshooting section
-- Open an issue on GitHub
+---
+Return to [Main Documentation](../../README.md).

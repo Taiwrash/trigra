@@ -1,67 +1,56 @@
 ---
 title: Environment Variables
-description: Configure TRIGRA using environment variables
+description: Configure Trigra using environment variables
 ---
 
 # Environment Variables
 
-TRIGRA can be configured using environment variables, which are set via Kubernetes secrets or ConfigMaps.
+Trigra is configured via environment variables, giving you full flexibility to deploy it in any environment—from local development to production Kubernetes clusters.
 
-## Required Variables
+## Core Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `WEBHOOK_SECRET` | Secret key for webhook validation | **Required** |
+| `GIT_PROVIDER` | `github`, `gitlab`, `gitea`, `bitbucket`, `git` | `github` |
+| `GIT_TOKEN` | Token for the Git provider API | - |
+| `PUBLIC_URL` | Your controller's public URL (for auto-webhooks) | - |
 
-## Optional Variables
+## Advanced Configuration
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GIT_PROVIDER` | Git provider to use (`github`, `gitlab`, `bitbucket`, `git`) | `github` |
-| `GIT_TOKEN` | Token for the Git provider API | `""` |
-| `GIT_REPO_URL` | Full URL of the Git repository (required for `git` provider) | `""` |
-| `BITBUCKET_USER` | Username for Bitbucket Basic Auth (required for `bitbucket` provider) | `""` |
-| `SERVER_PORT` | HTTP server port | `8082` |
-| `NAMESPACE` | Target namespace for deployments | `default` |
+| Variable | Description |
+|----------|-------------|
+| `GIT_SSH_KEY_FILE`| Path to SSH private key for the `git` provider |
+| `GIT_REPO_URL` | Full URL of the Git repository (required for `git` provider) |
+| `GIT_BASE_URL` | API base URL for self-hosted providers (GitLab/Gitea) |
+| `GIT_OWNER` | Repository owner/org (overrides discovery) |
+| `GIT_REPO` | Repository name (overrides discovery) |
+| `SERVER_PORT` | HTTP server port (default: `8082`) |
+| `NAMESPACE` | Target namespace for deployments (default: `default`) |
 
-## Environment Variable Details
+## Detailed Variable Info
 
-### GIT_PROVIDER
+### `PUBLIC_URL`
+Set this to the public address where Trigra is reachable (e.g., `https://trigra.example.com`). When provided, Trigra will attempt to **automatically register** its webhook endpoint with GitHub, GitLab, or Gitea on startup.
 
-The Git provider where your manifests are stored.
-- `github` (default): Native GitHub API support.
-- `gitlab`: Native GitLab API support.
-- `gitea`: Native Gitea / Forgejo support. Works well with homelabs.
-- `bitbucket`: Bitbucket Cloud support. Requires `BITBUCKET_USER`.
-- `git`: Generic Git support using local cloning. Requires `GIT_REPO_URL`.
+### `GIT_SSH_KEY_FILE`
+Path to an SSH private key on the controller's filesystem. Used by the `git` provider to clone private repositories over SSH. 
+> **Tip:** In Kubernetes, mount this file from a Secret using a volume.
 
-### GIT_BASE_URL
+### `GIT_PROVIDER`
+- `github`: Standard GitHub.com integration.
+- `gitlab`: Supports both GitLab.com and self-managed instances.
+- `gitea`: Works with Gitea and Forgejo. Correct `GIT_BASE_URL` required for self-hosted.
+- `bitbucket`: Bitbucket Cloud support.
+- `git`: Generic implementation that clones the repo locally. Ideal for custom git servers or local testing.
 
-Optional for GitHub. Required for **on-premise** instances:
-- **Gitea**: e.g., `https://gitea.local`
-- **GitLab Self-Managed**: e.g., `https://gitlab.mycompany.com`
+### `WEBHOOK_SECRET`
+A shared secret between your Git provider and Trigra.
+- **GitHub**: Paste this in the "Secret" field of the webhook settings.
+- **GitLab**: Paste this in the "Secret token" field.
+- **Generic Git**: Trigra validates this against the `X-Trigra-Secret` header.
 
-### GIT_TOKEN
-
-**Recommended.** API token for the provider.
-- **GitHub**: Personal Access Token.
-- **GitLab**: Personal or Project Access Token.
-- **Gitea**: Settings -> Applications -> Tokens.
-- **Bitbucket**: App Password.
-
-### GIT_REPO_URL
-
-Only used with `GIT_PROVIDER=git`. This can be any URL accessible by the controller (e.g., `https://gitea.local/owner/repo.git`).
-
-### WEBHOOK_SECRET
-
-**Required.** Used to validate incoming webhooks.
-- **GitHub**: Set in the "Secret" field of the webhook.
-- **GitLab**: Set in the "Secret token" field.
-- **Bitbucket**: Not natively supported by Bitbucket Cloud webhooks, but can be used for secondary validation if implemented.
-- **Generic Git**: Checked against the `X-Trigra-Secret` header.
-
-## Setting via Kubernetes Secret
+## Kubernetes Secret Example
 
 ```yaml
 apiVersion: v1
@@ -70,7 +59,9 @@ metadata:
   name: trigra-secret
 type: Opaque
 stringData:
-  WEBHOOK_SECRET: "your-webhook-secret-here"
-  GIT_TOKEN: "your-provider-token"
-  GIT_REPO_URL: "https://your-git-server.com/repo.git" # Optional
+  GIT_TOKEN: "ghp_xxxxxxxxxxxx"
+  WEBHOOK_SECRET: "my-secure-webhook-secret"
+  PUBLIC_URL: "https://trigra.my-homelab.com"
+  # Optional: for SSH
+  # GIT_SSH_KEY_FILE: "/etc/trigra/id_rsa"
 ```

@@ -1,96 +1,82 @@
 # Quick Start Guide
 
-This is a quick reference for common tasks. See [README.md](README.md) for full documentation.
+This guide will help you get Trigra up and running in minutes.
 
-## Local Development
+## 🚀 Instant Deployment
 
-```bash
-# 1. Setup
-make dev-setup
-# Edit .env with your values
-
-# 2. Run locally
-make run
-```
-
-## Deploy to Kubernetes
+The fastest way to deploy Trigra to your cluster is using our interactive installer:
 
 ```bash
-# 1. Build image
-make docker-build
+# Set your Git provider configuration
+export GIT_PROVIDER="github"
+export GIT_TOKEN="ghp_your_personal_access_token"
+export WEBHOOK_SECRET=$(openssl rand -hex 32)
+export PUBLIC_URL="https://trigra.yourdomain.com" # Required for auto-webhooks
 
-# 2. Create secret
-cp deployments/kubernetes/secret.yaml.example deployments/kubernetes/secret.yaml
-# Edit with your GitHub token and webhook secret
-
-# 3. Deploy
-kubectl apply -f deployments/kubernetes/secret.yaml
-make deploy
-
-# 4. Get webhook URL
-kubectl get svc trigra
+# Run the installer
+curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 
-## Configure GitHub Webhook
+## 🛠 Manual Installation
 
-1. Go to your repo → Settings → Webhooks → Add webhook
-2. Payload URL: `http://<EXTERNAL-IP>/webhook`
-3. Content type: `application/json`
-4. Secret: Your `WEBHOOK_SECRET` value
-5. Events: Just the push event
+If you prefer to maintain full control, follow these steps:
 
-## Test GitOps Flow
+1. **Clone the Repo**:
+   ```bash
+   git clone https://github.com/Taiwrash/trigra.git
+   cd trigra
+   ```
 
-```bash
-# Create a deployment
-cat > nginx.yaml <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: test-nginx
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:alpine
-EOF
+2. **Configure Secrets**:
+   Edit `deployments/kubernetes/example-secret.yaml` and apply it:
+   ```bash
+   kubectl apply -f deployments/kubernetes/example-secret.yaml
+   ```
 
-# Push to Git
-git add nginx.yaml
-git commit -m "Deploy nginx"
-git push
+3. **Deploy Core Components**:
+   ```bash
+   kubectl apply -f deployments/kubernetes/rbac.yaml
+   # Note: Ensure you update the image in deployment.yaml if using a custom build
+   kubectl apply -f deployments/kubernetes/deployment.yaml
+   kubectl apply -f deployments/kubernetes/service.yaml
+   ```
 
-# Watch it deploy!
-kubectl get deployments -w
-```
+4. **Automated Webhook**:
+   If you provided `PUBLIC_URL`, Trigra will automatically register its webhook with your Git provider (GitHub, GitLab, or Gitea) on startup.
 
-## Useful Commands
+## 🧪 Testing the Flow
 
-```bash
-make help          # Show all commands
-make logs          # View controller logs
-make status        # Check deployment status
-make example-deploy # Deploy example resources
-```
+1. Create a simple manifest in your Git repo:
+   ```yaml
+   # test-app.yaml
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: trigra-test
+   data:
+     message: "Trigra is working!"
+   ```
 
-## Troubleshooting
+2. Commit and Push:
+   ```bash
+   git add test-app.yaml
+   git commit -m "Test Trigra sync"
+   git push
+   ```
 
-**Webhook not working?**
-- Check GitHub webhook deliveries
-- View logs: `make logs`
-- Verify secret matches
+3. Verify:
+   ```bash
+   kubectl get configmap trigra-test -o yaml
+   ```
 
-**Resources not applying?**
-- Check RBAC permissions
-- Validate YAML: `kubectl apply --dry-run=client -f file.yaml`
-- Check controller logs
+## 🔍 Useful Commands
 
-For more help, see [README.md](README.md#-troubleshooting)
+| Task | Command |
+|------|---------|
+| View Logs | `kubectl logs -f deployment/trigra` |
+| Check Status | `kubectl get pods -l app=trigra` |
+| Health Check | `curl http://<trigra-ip>/health` |
+| Ready Check | `curl http://<trigra-ip>/ready` |
+
+---
+For detailed information, visit the [Full Documentation](README.md).

@@ -1,235 +1,60 @@
-# TRIGRA Examples Directory
+# Trigra Examples Directory
 
-This directory contains ready-to-use Kubernetes manifests that you can copy and paste to deploy applications using TRIGRA (Kubernetes GitOps Homelab).
+This directory contains ready-to-use Kubernetes manifests that demonstrate the power of Trigra's GitOps flow. Copy these to your repository to see Trigra in action!
 
 ## 📋 Available Examples
 
-### Basic Examples
+### 1. **Core Resources**
 
-#### 1. **deployment.yaml**
-Simple Nginx deployment demonstrating:
-- Basic deployment configuration
-- Resource limits and requests
-- Container port mapping
+- **`deployment.yaml`**: Simple Nginx deployment with resource limits.
+- **`service.yaml`**: Standard ClusterIP service for internal networking.
+- **`configmap.yaml`**: Configuration management with multi-file data.
 
-```bash
-kubectl apply -f deployment.yaml
-```
+### 2. **Complete Applications**
 
-#### 2. **service.yaml**
-ClusterIP service example showing:
-- Service selector configuration
-- Port mapping
-- Internal cluster networking
+#### 📊 Homepage Dashboard (`homepage-dashboard.yaml`)
+A stunning, high-performance dashboard for your cluster:
+- **Features**: Real-time K8s stats, sleek dark mode, and integrated service bookmarks.
+- **Components**: Deployment, Service, ConfigMap (with full HTML/JS/CSS), and Ingress.
 
-```bash
-kubectl apply -f service.yaml
-```
+#### ✨ Awesome Homepage (`awesome-homepage.yaml`)
+A modern, animated landing page with glassmorphism and particles:
+- **Features**: 60fps animations, responsive design, and easy customization via ConfigMap.
+- **Components**: Full-stack application packaged as a single K8s manifest.
 
-#### 3. **configmap.yaml**
-ConfigMap with multiple data files:
-- Application properties
-- Database configuration
-- Multi-file ConfigMap structure
+#### 🤖 AI with Ollama (`ollama-ai-model.yaml`)
+Run large language models locally on your cluster:
+- **Features**: Persistent storage for models, API access via Ingress, and GPU support.
+- **Components**: PVC (50GB), Deployment, Service, and Ingress.
 
-```bash
-kubectl apply -f configmap.yaml
-```
+## 🚀 How to use with Trigra
 
----
+1. **Pick an example**:
+   ```bash
+   cp deployments/examples/homepage-dashboard.yaml my-dashboard.yaml
+   ```
 
-### Complete Application Examples
+2. **Customize if needed**:
+   Open the file and update namespaces, image tags, or configuration values.
 
-#### 4. **homepage-dashboard.yaml** 📊
-**Homepage - Application Dashboard for your Homelab**
+3. **Commit and Push**:
+   ```bash
+   git add my-dashboard.yaml
+   git commit -m "feat: deploy homepage dashboard via Trigra"
+   git push origin main
+   ```
 
-[Homepage](https://gethomepage.dev/) is a highly customizable dashboard with 100+ service integrations.
+4. **Watch Trigra Sync**:
+   Monitor the Trigra logs:
+   ```bash
+   kubectl logs -f deployment/trigra
+   ```
 
-Includes:
-- ✅ ServiceAccount with RBAC permissions
-- ✅ ConfigMap with customizable dashboard settings
-- ✅ Kubernetes cluster monitoring widgets
-- ✅ Service bookmarks and custom services
-- ✅ Resource usage and metrics widgets
-- ✅ Deployment with health checks
-- ✅ ClusterIP service and Ingress
+## 🔧 Tips for Best Results
 
-**Deploy:**
-```bash
-kubectl apply -f homepage-dashboard.yaml
-```
-
-**Access:**
-- Update `host: dashboard.local` to your domain in the Ingress section
-- Configure your DNS or `/etc/hosts` file
-- Visit `http://dashboard.local`
-
-**Customize:**
-Edit the ConfigMap to:
-- Add your own services and bookmarks
-- Change theme and colors
-- Configure widgets and layout
-- Add service integrations (Plex, Sonarr, Radarr, etc.)
-
-**Features:**
-- 📊 Real-time Kubernetes cluster monitoring
-- 🔖 Organize all your homelab services
-- 🎨 Multiple themes (dark/light)
-- 📈 CPU, memory, and network metrics
-- 🔍 Integrated search (DuckDuckGo, Google, etc.)
-- 🔗 100+ service integrations with status widgets
+- **Namespaces**: Always check the `metadata.namespace` field. By default, most examples use `default`.
+- **Ingress**: If you use an Ingress controller, update the `hosts` and `ingressClassName` to match your environment.
+- **Storage**: For the AI model (Ollama), ensure your cluster has a default `StorageClass` or specify one in the `PersistentVolumeClaim`.
 
 ---
-
-#### 5. **awesome-homepage.yaml** ✨
-**Awesome Modern Homepage with Animations**
-
-A visually stunning, animated homepage with modern design elements.
-
-Includes:
-- ✅ Animated particle background
-- ✅ Glassmorphism design elements
-- ✅ Service cards with hover effects
-- ✅ Stats dashboard
-- ✅ Smooth CSS animations
-- ✅ Fully responsive layout
-- ✅ Customizable service links
-
-**Deploy:**
-```bash
-kubectl apply -f awesome-homepage.yaml
-```
-
-**Access:**
-- Update `host: awesome.local` to your domain in the Ingress section
-- Configure your DNS or `/etc/hosts` file
-- Visit `http://awesome.local`
-
-**Features:**
-- 🎨 Modern gradient backgrounds
-- ✨ 50 animated floating particles
-- 💎 Glassmorphism UI elements
-- 📊 Stats cards with pulse animations
-- 🎯 Service grid with 6 customizable cards
-- 🔗 Quick links section
-- 📱 Fully responsive design
-
-**Customize:**
-Edit the ConfigMap HTML to:
-- Change service names and descriptions
-- Update service URLs in the JavaScript section
-- Modify colors and gradients in CSS
-- Add or remove service cards
-- Customize stats and quick links
-
----
-
-#### 6. **ollama-ai-model.yaml** 🤖
-**Run AI models locally on your cluster**
-
-Includes:
-- ✅ 50GB PersistentVolumeClaim for model storage
-- ✅ Ollama deployment with resource limits
-- ✅ ClusterIP and NodePort services
-- ✅ Ingress for API access
-- ✅ GPU support (commented out, uncomment if available)
-- ✅ Usage instructions ConfigMap
-
-**Deploy:**
-```bash
-kubectl apply -f ollama-ai-model.yaml
-```
-
-**Quick Start:**
-```bash
-# Access the Ollama pod
-kubectl exec -it deployment/ollama -- /bin/bash
-
-# Pull a model (choose one)
-ollama pull gemma:2b      # 1.4GB - Fast, good for testing
-ollama pull llama2        # 3.8GB - General purpose
-ollama pull gemma:7b      # 4.8GB - Better quality
-ollama pull mistral       # 4.1GB - High performance
-ollama pull codellama     # 3.8GB - Code generation
-
-# Run the model interactively
-ollama run gemma:2b
-```
-
-**Access Methods:**
-1. **From within cluster:** `http://ollama:11434`
-2. **NodePort:** `http://<node-ip>:30434`
-3. **Ingress:** `http://ollama.local` (configure DNS)
-
-**API Usage:**
-```bash
-curl http://ollama:11434/api/generate -d '{
-  "model": "gemma:2b",
-  "prompt": "Explain Kubernetes in simple terms"
-}'
-```
-
-**Resource Requirements:**
-- 2B models: 4GB RAM minimum
-- 7B models: 8GB RAM minimum
-- 13B models: 16GB RAM minimum
-- 70B models: 64GB RAM minimum
-
----
-
-## 🚀 Using with TRIGRA
-
-All these examples work seamlessly with TRIGRA's GitOps workflow:
-
-1. **Copy the example** to your Git repository
-2. **Customize** as needed (change names, namespaces, resources)
-3. **Commit and push** to your repository
-4. **Watch TRIGRA** automatically apply the changes to your cluster
-
-```bash
-# Example workflow
-cp deployments/examples/homepage-complete.yaml my-homepage.yaml
-vim my-homepage.yaml  # Customize
-git add my-homepage.yaml
-git commit -m "Deploy my homepage"
-git push origin main
-# TRIGRA automatically applies the changes! 🎉
-```
-
-## 💡 Tips
-
-- **Namespaces:** All examples use `namespace: default`. Change this to organize your applications.
-- **Resource Limits:** Adjust CPU and memory based on your cluster capacity.
-- **Storage:** Update `storageClassName` in PVCs to match your cluster's storage classes.
-- **Ingress:** Configure `ingressClassName` and `host` based on your ingress controller.
-- **Combine Examples:** Use `---` separator to combine multiple resources in one file.
-
-## 🔧 Troubleshooting
-
-**Pods not starting?**
-```bash
-kubectl describe pod <pod-name>
-kubectl logs <pod-name>
-```
-
-**Service not accessible?**
-```bash
-kubectl get svc
-kubectl get endpoints
-```
-
-**Ingress not working?**
-```bash
-kubectl get ingress
-kubectl describe ingress <ingress-name>
-```
-
-## 📚 Learn More
-
-- [Main README](../../README.md)
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-- [Ollama Documentation](https://ollama.ai/)
-
----
-
-**Happy deploying! 🚀**
+Return to [Main Documentation](../../README.md).

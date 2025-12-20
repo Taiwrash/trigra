@@ -1,5 +1,5 @@
 ---
-title: TRIGRA
+title: Trigra
 description: Simple, Lightweight GitOps for Any Kubernetes Cluster
 template: splash
 hero:
@@ -21,30 +21,30 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 ## ⚡ One Command Install
 
 ```bash
-# MAKE SURE THERE IS KUBERNETES AND KUBECTL IS INSTALLED BEFORE RUNNING THIS COMMAND
-# THIS WILL INSTALL TRIGRA IN DEFAULT NAMESPACE
-# IF YOU WANT TO INSTALL IN A DIFFERENT NAMESPACE, RUN THE FOLLOWING COMMAND
-# curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/install.sh | bash -s -- <namespace>
+# Deploy Trigra with automated webhook registration
+export GIT_PROVIDER="github"
+export GIT_TOKEN="ghp_..."
+export PUBLIC_URL="https://trigra.yourdomain.com"
 curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 
-## Why TRIGRA?
+## Why Trigra?
 
 <CardGrid stagger>
-  <Card title="🚀 Universal Support" icon="rocket">
-    Deploy any Kubernetes resource - Deployments, Services, ConfigMaps, Secrets, and more.
+  <Card title="🚀 Multi-Provider" icon="rocket">
+    Native support for GitHub, GitLab, Gitea, Bitbucket, and Generic Git.
   </Card>
-  <Card title="🏠 Homelab Ready" icon="laptop">
-    Optimized for multi-node homelab clusters with built-in HA support.
+  <Card title="🔗 Auto-Webhooks" icon="setting">
+    Automated zero-touch webhook registration for major providers.
   </Card>
-  <Card title="⚡ Auto-Detect" icon="setting">
-    Automatically detects in-cluster vs out-of-cluster mode.
+  <Card title="🔑 SSH Support" icon="lock">
+    Securely connect to private repositories using SSH keys.
   </Card>
-  <Card title="🔒 Secure" icon="approve-check">
-    Webhook validation, RBAC, and secret management built-in.
+  <Card title="🛡️ Secure by Design" icon="approve-check">
+    Runs as non-root with built-in SAST, SCA, and secret scanning.
   </Card>
-  <Card title="📦 Helm Chart" icon="document">
-    Full Helm chart with customizable values for easy deployment.
+  <Card title="📦 Multi-Platform" icon="document">
+    Official images for AMD64 and ARM64 (Raspberry Pi & Apple Silicon).
   </Card>
   <Card title="🎯 GitOps Native" icon="pencil">
     Edit YAML, commit to Git, watch it deploy automatically.
@@ -56,7 +56,7 @@ curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.
 <CardGrid>
   <LinkCard
     title="📊 Homepage Dashboard"
-    description="Beautiful dashboard to manage all your homelab services"
+    description="Beautiful dashboard to manage all your cluster services"
     href="/trigra/guides/deploy-examples#homepage-dashboard"
   />
   <LinkCard
@@ -71,27 +71,27 @@ curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.
   />
 </CardGrid>
 
-## Quick Links
+## Documentation
 
 <CardGrid>
   <LinkCard
-    title="Installation Guide"
-    description="Multiple ways to install TRIGRA"
-    href="/trigra/getting-started/installation/"
+    title="Quickstart Guide"
+    description="Get running in under 5 minutes"
+    href="/trigra/getting-started/quickstart/"
   />
   <LinkCard
-    title="GitHub Webhooks"
-    description="Set up automated deployments"
+    title="Automated Webhooks"
+    description="Zero-touch provider integration"
     href="/trigra/guides/github-webhooks/"
   />
   <LinkCard
-    title="Cloudflare Tunnel"
-    description="Expose your cluster securely"
-    href="/trigra/guides/cloudflare-tunnel/"
+    title="SSH Private Repos"
+    description="Deploy from private git servers"
+    href="/trigra/configuration/environment#git_ssh_key_file"
   />
   <LinkCard
-    title="Configuration"
-    description="Customize TRIGRA for your needs"
-    href="/trigra/configuration/helm-values/"
+    title="Environment Config"
+    description="Customize Trigra for your needs"
+    href="/trigra/configuration/environment/"
   />
 </CardGrid>

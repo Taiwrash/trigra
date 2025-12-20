@@ -1,89 +1,50 @@
-# TRIGRA Quick Start Card
+# Trigra - Kubernetes Quick Start Card
 
-## For Users Without Codebase Access
+A cheat-sheet for deploying Trigra quickly in any environment.
 
-### 1️⃣ Get the Files
+## 1️⃣ One-Step Installation (Installer)
 
 ```bash
-mkdir trigra-deploy && cd trigra-deploy
+export GIT_PROVIDER="github"        # or gitlab, gitea
+export GIT_TOKEN="ghp_xxx"          # Personal Access Token
+export PUBLIC_URL="https://xxx.com" # Required for Auto-Webhooks
+export WEBHOOK_SECRET="secure-key"  # Used for webhook validation
 
-# Download manifests
-curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/secret.yaml.example
+curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
+```
+
+## 2️⃣ Manual Manifest Deployment
+
+```bash
+# Get the manifests
+mkdir trigra && cd trigra
+curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/trigra-config.yaml
+curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/example-secret.yaml
 curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/deployment.yaml
 curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/rbac.yaml
 curl -O https://raw.githubusercontent.com/Taiwrash/trigra/main/deployments/kubernetes/service.yaml
+
+# 1. Update config and secrets
+vim trigra-config.yaml
+vim example-secret.yaml # rename to secret.yaml
+
+# 2. Apply everything
+kubectl apply -f .
 ```
 
-### 2️⃣ Get GitHub Token
+## 3️⃣ Verification
 
-1. Go to: https://github.com/settings/tokens
-2. Click "Generate new token (classic)"
-3. Select scope: `repo` (for private) or `public_repo` (for public)
-4. Copy the token
+| Command | Purpose |
+|---------|---------|
+| `kubectl get pods -l app=trigra` | Check if Trigra is running |
+| `kubectl logs -f deployment/trigra` | Watch real-time sync activities |
+| `kubectl describe deployment trigra` | Check configuration and events |
 
-### 3️⃣ Configure Secret
+## 💡 Troubleshooting
 
-```bash
-# Create your secret file
-cp secret.yaml.example secret.yaml
-
-# Edit it
-vim secret.yaml
-```
-
-Replace these values:
-```yaml
-GITHUB_TOKEN: "ghp_your_actual_token_here"
-WEBHOOK_SECRET: "your_webhook_secret_here"  # Generate with: openssl rand -hex 32
-```
-
-### 4️⃣ Deploy
-
-```bash
-kubectl apply -f secret.yaml
-kubectl apply -f rbac.yaml
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-```
-
-### 5️⃣ Verify
-
-```bash
-# Check if running
-kubectl get pods -l app=trigra
-
-# View logs
-kubectl logs -l app=trigra -f
-```
-
-## Common Issues
-
-| Problem | Solution |
-|---------|----------|
-| Pod not starting | Check: `kubectl describe pod -l app=trigra` |
-| Auth errors | Verify token has `repo` or `public_repo` scope |
-| Not detecting changes | Check `GITHUB_REPO` URL is correct |
-| Image pull error | Image is public, check internet connection |
-
-## Update Configuration
-
-```bash
-# Edit secret
-vim secret.yaml
-
-# Apply changes
-kubectl apply -f secret.yaml
-
-# Restart
-kubectl rollout restart deployment trigra
-```
-
-## Uninstall
-
-```bash
-kubectl delete -f .
-```
+- **No sync?**: Check if `PUBLIC_URL` is set or webhooks are configured in your Git provider.
+- **Auth error?**: Ensure `GIT_TOKEN` has `repo` (private) or `public_repo` scope.
+- **Traverse error?**: Check your manifest paths; Trigra sanitizes all file paths for security.
 
 ---
-
-📖 **Full Guide**: See [deployments/kubernetes/README.md](README.md) for detailed instructions
+📖 **Full Guide**: [Main README](../../README.md)

@@ -1,11 +1,11 @@
 ---
 title: Quick Start
-description: Get TRIGRA running on your cluster in 5 minutes
+description: Get Trigra running on your cluster in 5 minutes
 ---
 
 # Quick Start
 
-Get TRIGRA up and running on your Kubernetes cluster in under 5 minutes.
+Get Trigra up and running on your Kubernetes cluster in under 5 minutes.
 
 ## Prerequisites
 
@@ -17,23 +17,29 @@ Before you begin, ensure you have:
 
 ## One-Command Install
 
-The fastest way to install TRIGRA:
+The fastest way to install Trigra is using our interactive installer. By providing your Git provider details, Trigra can even **automatically register** its webhook for you.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash -s -- default
+# Optional: Pre-set configuration for zero-touch install
+export GIT_PROVIDER="github"        # or gitlab, gitea
+export GIT_TOKEN="ghp_xxx"          # your PAT
+export PUBLIC_URL="https://xxx.trycloudflare.com"
+
+# Run the installer
+curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 
 This will:
 
-1. ✅ Create the `default` namespace (or use existing)
-2. ✅ Generate a secure webhook secret
-3. ✅ Deploy TRIGRA controller
-4. ✅ Install Cloudflare Tunnel (optional)
-5. ✅ Display your webhook URL
+1. ✅ Setup the target namespace
+2. ✅ Configure your Git credentials securely
+3. ✅ Deploy the Trigra controller
+4. ✅ Setup a Cloudflare Tunnel (if requested)
+5. ✅ **Automate** webhook registration (if `PUBLIC_URL` provided)
 
 ## What Happens Next
 
-After installation, you'll see output like:
+After installation, if you didn't provide a `PUBLIC_URL` for auto-setup, you'll see your webhook details:
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -43,13 +49,13 @@ After installation, you'll see output like:
 ║  https://random-words.trycloudflare.com/webhook
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
-
-✓ Tunnel running in background (PID: 12345)
 ```
 
-## Configure GitHub Webhook
+## Configure Your Git Provider
 
-1. Go to your **GitHub repository** → **Settings** → **Webhooks**
+If not already automated, follow these steps:
+
+1. Go to your **repository settings** → **Webhooks**
 2. Click **Add webhook**
 3. Configure:
    - **Payload URL**: The webhook URL from installation
@@ -57,43 +63,32 @@ After installation, you'll see output like:
    - **Secret**: Your webhook secret (shown during install)
    - **Events**: Just the push event
 
-## Test Your Setup
+## Test Your Flow
 
-Create a simple deployment in your repository:
+Create a simple manifest in your repository:
 
 ```yaml
-# test-app.yaml
-apiVersion: apps/v1
-kind: Deployment
+# test-trigra.yaml
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: test-nginx
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:alpine
+  name: trigra-test
+data:
+  status: "Synchronized by Trigra"
 ```
 
 Commit and push:
 
 ```bash
-git add test-app.yaml
-git commit -m "Test GitOps deployment"
+git add test-trigra.yaml
+git commit -m "Test Trigra deployment"
 git push
 ```
 
-Watch it deploy:
+Watch it deploy instantly:
 
 ```bash
-kubectl get deployments -w
+kubectl get configmap trigra-test -o yaml
 ```
 
 ## Verify Installation
@@ -101,10 +96,7 @@ kubectl get deployments -w
 Check that everything is running:
 
 ```bash
-# Check deployment
-kubectl get deployment trigra
-
-# Check pods
+# Check status
 kubectl get pods -l app=trigra
 
 # View logs
@@ -113,7 +105,7 @@ kubectl logs -f deployment/trigra
 
 ## Next Steps
 
-- 📖 Read the full [Installation Guide](/trigra/getting-started/installation/) for more options
-- 🔗 Learn about [GitHub Webhooks](/trigra/guides/github-webhooks/) configuration
-- 🌐 Set up [Cloudflare Tunnel](/trigra/guides/cloudflare-tunnel/) for external access
-- 📦 Deploy [pre-built examples](/trigra/guides/deploy-examples/)
+- 📖 Read the full [Environment Config](/trigra/configuration/environment/)
+- 📦 Deploy [ready-to-use examples](/trigra/guides/deploy-examples/)
+- 🔑 Set up [Private Repos via SSH](/trigra/configuration/environment#git_ssh_key_file)
+- 🌐 Setup [Cloudflare Tunnel](/trigra/guides/cloudflare-tunnel/) manually

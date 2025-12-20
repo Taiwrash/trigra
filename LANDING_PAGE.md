@@ -1,71 +1,44 @@
-# TRIGRA Landing Page
+# Trigra Landing Page
 
-A modern, dark-themed landing page for the TRIGRA project.
+Trigra features a modern, dark-themed, glassmorphic landing page designed to impress and convert.
 
-## Features
+## ✨ Features
 
-- 🎨 **Dark Mode Design** - Beautiful gradient background with animations
-- 📋 **One-Click Copy** - Installation command with copy button
-- ⚡ **Animated** - Smooth transitions and floating background elements
-- 📱 **Responsive** - Works perfectly on all devices
-- ⌨️ **Keyboard Shortcut** - Press Ctrl/Cmd + K to copy command
+- 🎨 **Modern Aesthetics** - Deep space dark mode with vibrant accents.
+- ⚡ **Interactive Installer** - Highlighted installation command with one-click copy.
+- 💎 **Glassmorphism** - Semi-transparent cards with frosted glass effects.
+- 📱 **Mobile First** - Perfectly responsive for developers on the go.
+- 🌊 **Smooth Animations** - Subtle micro-animations and floating background particles.
 
-## Preview
+## 🚀 Deployment
 
-Open `index.html` in your browser to see the landing page.
+### GitHub Pages (Recommended)
 
-## Deployment
+1. Ensure `index.html` is in your repository root.
+2. Go to **Settings** → **Pages**.
+3. Set Source to `Deploy from a branch`.
+4. Branch: `main`, Folder: `/ (root)`.
+5. Your page will be live at `https://taiwrash.github.io/trigra/`.
 
-### GitHub Pages
+### Automated Docs Deployment
+We also include a `.github/workflows/deploy-docs.yml` which can automate the deployment of the full Starlight-based documentation site found in the `/website` directory.
 
-1. Push `index.html` to your repository
-2. Go to Settings → Pages
-3. Select branch: `main`
-4. Select folder: `/ (root)`
-5. Save
+## 🛠 Local Preview
 
-Your page will be available at: `https://taiwrash.github.io/trigra/`
-
-### Custom Domain
-
-Add a `CNAME` file with your domain:
+To view the landing page locally:
 
 ```bash
-echo "gitops.yourdomain.com" > CNAME
-git add CNAME
-git commit -m "Add custom domain"
-git push
-```
-
-## Local Development
-
-```bash
-# Open in browser
-open index.html
-
-# Or serve with Python
+# Simple Python server
 python3 -m http.server 8000
 # Visit http://localhost:8000
 ```
 
-## Customization
+## 🎨 Customization
 
-Edit `index.html` to customize:
+You can easily adapt the landing page to your style:
+- **Typography**: Uses modern sans-serif fonts from Google Fonts.
+- **Color Palette**: Controlled via CSS variables in the `<style>` section.
+- **Copy Target**: The `copyCommand` function handles the "Click to Copy" logic.
 
-- Colors: Change CSS variables in `:root`
-- Features: Update the `.features` grid
-- Links: Modify GitHub URLs
-- Command: Update the install command
-
-## Installation Command
-
-The page displays:
-```bash
-# MAKE SURE THERE IS KUBERNETES AND KUBECTL IS INSTALLED BEFORE RUNNING THIS COMMAND
-# THIS WILL INSTALL TRIGRA IN DEFAULT NAMESPACE
-# IF YOU WANT TO INSTALL IN A DIFFERENT NAMESPACE, RUN THE FOLLOWING COMMAND
-# curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/install.sh | bash -s -- <namespace>
-curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/install.sh | bash
-```
-
-Make sure `install.sh` is in your repository root!
+---
+View the live [Trigra Documentation](https://taiwrash.github.io/trigra/docs).
