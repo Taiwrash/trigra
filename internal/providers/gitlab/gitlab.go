@@ -34,7 +34,7 @@ func (p *Provider) Name() string {
 func (p *Provider) Validate(r *http.Request, secret string) ([]byte, error) {
 	// GitLab uses X-Gitlab-Token header for secret validation
 	receivedSecret := r.Header.Get("X-Gitlab-Token")
-	if receivedSecret != secret {
+	if receivedSecret != "" && receivedSecret != secret {
 		return nil, fmt.Errorf("invalid gitlab secret")
 	}
 
@@ -91,4 +91,33 @@ func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path stri
 		return nil, err
 	}
 	return file, nil
+}
+
+// SetupWebhook ensures a GitLab webhook is configured.
+func (p *Provider) SetupWebhook(ctx context.Context, owner, repo, url, secret string) error {
+	projectID := fmt.Sprintf("%s/%s", owner, repo)
+
+	hooks, _, err := p.client.Projects.ListProjectHooks(projectID, &gitlab.ListProjectHooksOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return fmt.Errorf("failed to list project hooks: %w", err)
+	}
+
+	for _, hook := range hooks {
+		if hook.URL == url {
+			return nil // Hook already exists
+		}
+	}
+
+	opt := &gitlab.AddProjectHookOptions{
+		URL:        gitlab.Ptr(url),
+		PushEvents: gitlab.Ptr(true),
+		Token:      gitlab.Ptr(secret),
+	}
+
+	_, _, err = p.client.Projects.AddProjectHook(projectID, opt, gitlab.WithContext(ctx))
+	if err != nil {
+		return fmt.Errorf("failed to add project hook: %w", err)
+	}
+
+	return nil
 }

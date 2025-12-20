@@ -57,7 +57,7 @@ func main() {
 	case "bitbucket":
 		provider = bitbucket.NewProvider(os.Getenv("BITBUCKET_USER"), cfg.GitToken)
 	case "git":
-		provider = git.NewProvider(cfg.GitRepoURL)
+		provider = git.NewProvider(cfg.GitRepoURL, cfg.GitSSHKeyFile)
 	default:
 		log.Fatalf("Unsupported git provider: %s", cfg.GitProvider)
 	}

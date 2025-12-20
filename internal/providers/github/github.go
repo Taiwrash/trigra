@@ -67,7 +67,7 @@ func (p *Provider) ParsePushEvent(r *http.Request, payload []byte) (*providers.P
 	}
 
 	return &providers.PushEvent{
-		Owner:         pushEvent.Repo.GetOwner().GetName(),
+		Owner:         pushEvent.Repo.GetOwner().GetLogin(),
 		Repo:          pushEvent.Repo.GetName(),
 		Ref:           pushEvent.GetRef(),
 		After:         pushEvent.GetAfter(),
@@ -92,4 +92,35 @@ func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path stri
 	defer func() { _ = fileReader.Close() }()
 
 	return io.ReadAll(fileReader)
+}
+
+// SetupWebhook ensures a GitHub webhook is configured.
+func (p *Provider) SetupWebhook(ctx context.Context, owner, repo, url, secret string) error {
+	hooks, _, err := p.client.Repositories.ListHooks(ctx, owner, repo, &github.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list hooks: %w", err)
+	}
+
+	for _, hook := range hooks {
+		if hook.GetConfig().GetURL() == url {
+			return nil // Hook already exists
+		}
+	}
+
+	newHook := &github.Hook{
+		Active: github.Ptr(true),
+		Events: []string{"push"},
+		Config: &github.HookConfig{
+			URL:         github.Ptr(url),
+			ContentType: github.Ptr("json"),
+			Secret:      github.Ptr(secret),
+		},
+	}
+
+	_, _, err = p.client.Repositories.CreateHook(ctx, owner, repo, newHook)
+	if err != nil {
+		return fmt.Errorf("failed to create hook: %w", err)
+	}
+
+	return nil
 }

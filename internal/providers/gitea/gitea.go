@@ -115,3 +115,33 @@ func (p *Provider) DownloadFile(_ context.Context, owner, repo, ref, path string
 	}
 	return data, nil
 }
+
+// SetupWebhook ensures a Gitea webhook is configured.
+func (p *Provider) SetupWebhook(_ context.Context, owner, repo, url, secret string) error {
+	hooks, _, err := p.client.ListRepoHooks(owner, repo, gitea.ListHooksOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list repo hooks: %w", err)
+	}
+
+	for _, hook := range hooks {
+		if hook.Config["url"] == url {
+			return nil // Hook already exists
+		}
+	}
+
+	_, _, err = p.client.CreateRepoHook(owner, repo, gitea.CreateHookOption{
+		Type: gitea.HookTypeGitea,
+		Config: map[string]string{
+			"url":          url,
+			"content_type": "json",
+			"secret":       secret,
+		},
+		Events: []string{"push"},
+		Active: true,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create repo hook: %w", err)
+	}
+
+	return nil
+}

@@ -22,8 +22,10 @@ type Config struct {
 	Namespace string
 
 	// Generic Git configuration
-	GitRepoURL string
-	GitBaseURL string
+	GitRepoURL    string
+	GitBaseURL    string
+	GitSSHKeyFile string // Path to SSH private key
+	PublicURL     string // The public URL where Trigra is reachable
 }
 
 // Load reads configuration from environment variables.
@@ -36,6 +38,8 @@ func Load() (*Config, error) {
 		Namespace:     getEnvOrDefault("NAMESPACE", "default"),
 		GitRepoURL:    os.Getenv("GIT_REPO_URL"),
 		GitBaseURL:    os.Getenv("GIT_BASE_URL"),
+		GitSSHKeyFile: os.Getenv("GIT_SSH_KEY_FILE"),
+		PublicURL:     os.Getenv("PUBLIC_URL"),
 	}
 
 	// Parse server port if provided

@@ -28,4 +28,7 @@ type Provider interface {
 
 	// DownloadFile downloads a single file from the repository
 	DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error)
+
+	// SetupWebhook ensures a webhook is configured for the target repository
+	SetupWebhook(ctx context.Context, owner, repo, url, secret string) error
 }

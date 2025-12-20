@@ -1,6 +1,8 @@
 # Trigra - Kubernetes GitOps Controller
 
-A lightweight GitOps controller for Kubernetes homelab clusters that automatically applies changes from your Git repository. Edit YAML files, commit to Git, and watch your cluster update automatically!
+[![Security & Tests](https://github.com/Taiwrash/trigra/actions/workflows/security.yml/badge.svg)](https://github.com/Taiwrash/trigra/actions/workflows/security.yml)
+
+A lightweight GitOps controller for Kubernetes clusters that automatically applies changes from your Git repository. Edit YAML files, commit to Git, and watch your cluster update automatically!
 
 ## 🚀 Features
 
