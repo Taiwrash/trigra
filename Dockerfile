@@ -2,8 +2,8 @@
 FROM golang:1.25-alpine AS builder
 
 # Add metadata
-LABEL org.opencontainers.image.title="TRIGRA - Kubernetes GitOps Homelab"
-LABEL org.opencontainers.image.description="Lightweight GitOps controller for Kubernetes homelab clusters"
+LABEL org.opencontainers.image.title="Trigra - Kubernetes GitOps Controller"
+LABEL org.opencontainers.image.description="Lightweight GitOps controller for Kubernetes clusters"
 LABEL org.opencontainers.image.authors="Taiwrash"
 LABEL org.opencontainers.image.source="https://github.com/Taiwrash/trigra"
 LABEL org.opencontainers.image.licenses="MIT"
@@ -30,8 +30,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 FROM alpine:latest
 
 # Add metadata to final image
-LABEL org.opencontainers.image.title="TRIGRA - Kubernetes GitOps Homelab"
-LABEL org.opencontainers.image.description="Lightweight GitOps controller for Kubernetes homelab clusters"
+LABEL org.opencontainers.image.title="Trigra - Kubernetes GitOps Controller"
+LABEL org.opencontainers.image.description="Lightweight GitOps controller for Kubernetes clusters"
 LABEL org.opencontainers.image.authors="Taiwrash"
 LABEL org.opencontainers.image.source="https://github.com/Taiwrash/trigra"
 LABEL org.opencontainers.image.licenses="MIT"
