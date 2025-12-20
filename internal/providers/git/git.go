@@ -114,6 +114,6 @@ func (p *Provider) DownloadFile(_ context.Context, _, _, ref, path string) ([]by
 	}
 
 	// We use ReadFile on a sanitized and validated path.
-	//nolint:gosec
+	// #nosec G304
 	return os.ReadFile(cleanPath)
 }
