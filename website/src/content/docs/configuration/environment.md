@@ -16,6 +16,8 @@ Trigra is configured via environment variables, giving you full flexibility to d
 | `GIT_TOKEN` | Token for the Git provider API | - |
 | `PUBLIC_URL` | Your controller's public URL (for auto-webhooks) | - |
 
+> **Note:** For specific configuration steps for GitLab, Gitea, and other providers, see the [Git Providers Guide](/trigra/guides/git-providers/).
+
 ## Advanced Configuration
 
 | Variable | Description |

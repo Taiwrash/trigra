@@ -36,6 +36,7 @@ export default defineConfig({
 				{
 					label: 'Guides',
 					items: [
+						{ label: 'Git Providers', slug: 'guides/git-providers' },
 						{ label: 'GitHub Webhooks', slug: 'guides/github-webhooks' },
 						{ label: 'Cloudflare Tunnel', slug: 'guides/cloudflare-tunnel' },
 						{ label: 'Deploy Examples', slug: 'guides/deploy-examples' },
