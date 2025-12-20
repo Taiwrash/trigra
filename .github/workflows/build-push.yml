@@ -1,9 +1,8 @@
 name: Build & Push
 
 on:
-  push:
-    branches: [ "main" ]
-    tags: [ "v*" ]
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -14,6 +13,7 @@ jobs:
       contents: write # Important for pushing manifest updates
     env:
       IMAGE_NAME: taiwrash/trigra
+      TAG_NAME: ${{ github.event.release.tag_name }}
     steps:
       - uses: actions/checkout@v4
       
@@ -38,6 +38,10 @@ jobs:
       - name: Fast Multi-Platform Build
         run: |
           chmod +x fast-build.sh
+          # Use the release tag name if provided
+          if [ -n "$TAG_NAME" ]; then
+            export TAG="$TAG_NAME"
+          fi
           ./fast-build.sh
 
       - name: Commit and Push Manifest Update

@@ -5,8 +5,8 @@
 set -e
 
 IMAGE_NAME="${IMAGE_NAME:-taiwrash/trigra}"
-# Generate a timestamp-based tag
-TAG="v$(date +%Y%m%d-%H%M%S)"
+# Generate a timestamp-based tag if not provided
+TAG="${TAG:-v$(date +%Y%m%d-%H%M%S)}"
 
 echo "🚀 Fast Multi-Platform Build"
 echo "=============================="
