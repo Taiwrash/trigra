@@ -15,28 +15,28 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-// GenericGitProvider implements providers.Provider by cloning repositories locally.
-type GenericGitProvider struct {
+// Provider implements providers.Provider by cloning repositories locally.
+type Provider struct {
 	baseDir string
 	repoURL string
 }
 
-// NewGenericGitProvider creates a new generic Git provider.
-func NewGenericGitProvider(repoURL string) *GenericGitProvider {
+// NewProvider creates a new generic Git provider.
+func NewProvider(repoURL string) *Provider {
 	tmpDir, _ := os.MkdirTemp("", "trigra-git-*")
-	return &GenericGitProvider{
+	return &Provider{
 		baseDir: tmpDir,
 		repoURL: repoURL,
 	}
 }
 
 // Name returns "git".
-func (p *GenericGitProvider) Name() string {
+func (p *Provider) Name() string {
 	return "git"
 }
 
 // Validate handles generic webhook validation.
-func (p *GenericGitProvider) Validate(r *http.Request, _ string) ([]byte, error) {
+func (p *Provider) Validate(r *http.Request, _ string) ([]byte, error) {
 	// For generic git, we just read the body.
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -46,7 +46,7 @@ func (p *GenericGitProvider) Validate(r *http.Request, _ string) ([]byte, error)
 }
 
 // ParsePushEvent parses a generic push event.
-func (p *GenericGitProvider) ParsePushEvent(_ *http.Request, _ []byte) (*providers.PushEvent, error) {
+func (p *Provider) ParsePushEvent(_ *http.Request, _ []byte) (*providers.PushEvent, error) {
 	// Generic git provider doesn't have a fixed webhook format.
 	return &providers.PushEvent{
 		Owner:         "generic",
@@ -58,7 +58,7 @@ func (p *GenericGitProvider) ParsePushEvent(_ *http.Request, _ []byte) (*provide
 }
 
 // DownloadFile "downloads" a file by reading it from the local clone.
-func (p *GenericGitProvider) DownloadFile(_ context.Context, _, _, ref, path string) ([]byte, error) {
+func (p *Provider) DownloadFile(_ context.Context, _, _, ref, path string) ([]byte, error) {
 	if p.repoURL == "" {
 		return nil, fmt.Errorf("GIT_REPO_URL not configured")
 	}
@@ -113,5 +113,7 @@ func (p *GenericGitProvider) DownloadFile(_ context.Context, _, _, ref, path str
 		return nil, fmt.Errorf("traversal attack detected: %s", path)
 	}
 
+	// We use ReadFile on a sanitized and validated path.
+	//nolint:gosec
 	return os.ReadFile(cleanPath)
 }

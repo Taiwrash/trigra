@@ -13,24 +13,24 @@ import (
 	"github.com/ktrysmt/go-bitbucket"
 )
 
-// BitbucketProvider implements the providers.Provider interface for Bitbucket.
-type BitbucketProvider struct {
+// Provider implements the providers.Provider interface for Bitbucket.
+type Provider struct {
 	client *bitbucket.Client
 }
 
-// NewBitbucketProvider creates a new Bitbucket provider instance.
-func NewBitbucketProvider(user, token string) *BitbucketProvider {
+// NewProvider creates a new Bitbucket provider instance.
+func NewProvider(user, token string) *Provider {
 	client, _ := bitbucket.NewBasicAuth(user, token)
-	return &BitbucketProvider{client: client}
+	return &Provider{client: client}
 }
 
 // Name returns "bitbucket".
-func (p *BitbucketProvider) Name() string {
+func (p *Provider) Name() string {
 	return "bitbucket"
 }
 
 // Validate validates the Bitbucket webhook payload.
-func (p *BitbucketProvider) Validate(r *http.Request, _ string) ([]byte, error) {
+func (p *Provider) Validate(r *http.Request, _ string) ([]byte, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (p *BitbucketProvider) Validate(r *http.Request, _ string) ([]byte, error) 
 }
 
 // ParsePushEvent parses a Bitbucket push event payload.
-func (p *BitbucketProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
+func (p *Provider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
 	eventKey := r.Header.Get("X-Event-Key")
 	if eventKey != "repo:push" {
 		return nil, fmt.Errorf("not a push event")
@@ -80,7 +80,7 @@ func (p *BitbucketProvider) ParsePushEvent(r *http.Request, payload []byte) (*pr
 }
 
 // DownloadFile downloads a file from Bitbucket.
-func (p *BitbucketProvider) DownloadFile(_ context.Context, owner, repo, ref, path string) ([]byte, error) {
+func (p *Provider) DownloadFile(_ context.Context, owner, repo, ref, path string) ([]byte, error) {
 	res, err := p.client.Repositories.Repository.GetFileBlob(&bitbucket.RepositoryBlobOptions{
 		Owner:    owner,
 		RepoSlug: repo,

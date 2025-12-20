@@ -49,15 +49,15 @@ func main() {
 	var provider providers.Provider
 	switch cfg.GitProvider {
 	case "github":
-		provider = github.NewGitHubProvider(cfg.GitToken)
+		provider = github.NewProvider(cfg.GitToken)
 	case "gitlab":
-		provider = gitlab.NewGitLabProvider(cfg.GitToken)
+		provider = gitlab.NewProvider(cfg.GitToken)
 	case "gitea":
-		provider = gitea.NewGiteaProvider(cfg.GitBaseURL, cfg.GitToken)
+		provider = gitea.NewProvider(cfg.GitBaseURL, cfg.GitToken)
 	case "bitbucket":
-		provider = bitbucket.NewBitbucketProvider(os.Getenv("BITBUCKET_USER"), cfg.GitToken)
+		provider = bitbucket.NewProvider(os.Getenv("BITBUCKET_USER"), cfg.GitToken)
 	case "git":
-		provider = git.NewGenericGitProvider(cfg.GitRepoURL)
+		provider = git.NewProvider(cfg.GitRepoURL)
 	default:
 		log.Fatalf("Unsupported git provider: %s", cfg.GitProvider)
 	}

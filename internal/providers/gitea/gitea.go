@@ -15,8 +15,8 @@ import (
 	"github.com/Taiwrash/trigra/internal/providers"
 )
 
-// GiteaProvider implements the providers.Provider interface for Gitea.
-type GiteaProvider struct {
+// Provider implements the providers.Provider interface for Gitea.
+type Provider struct {
 	client *gitea.Client
 }
 
@@ -40,19 +40,19 @@ type PushPayload struct {
 	} `json:"repository"`
 }
 
-// NewGiteaProvider creates a new Gitea provider instance.
-func NewGiteaProvider(baseURL, token string) *GiteaProvider {
+// NewProvider creates a new Gitea provider instance.
+func NewProvider(baseURL, token string) *Provider {
 	client, _ := gitea.NewClient(baseURL, gitea.SetToken(token))
-	return &GiteaProvider{client: client}
+	return &Provider{client: client}
 }
 
 // Name returns "gitea".
-func (p *GiteaProvider) Name() string {
+func (p *Provider) Name() string {
 	return "gitea"
 }
 
 // Validate validates the Gitea webhook payload.
-func (p *GiteaProvider) Validate(r *http.Request, secret string) ([]byte, error) {
+func (p *Provider) Validate(r *http.Request, secret string) ([]byte, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (p *GiteaProvider) Validate(r *http.Request, secret string) ([]byte, error)
 }
 
 // ParsePushEvent parses a Gitea push event payload.
-func (p *GiteaProvider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
+func (p *Provider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
 	var event PushPayload
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (p *GiteaProvider) ParsePushEvent(_ *http.Request, payload []byte) (*provid
 }
 
 // DownloadFile downloads a file from Gitea.
-func (p *GiteaProvider) DownloadFile(_ context.Context, owner, repo, ref, path string) ([]byte, error) {
+func (p *Provider) DownloadFile(_ context.Context, owner, repo, ref, path string) ([]byte, error) {
 	data, _, err := p.client.GetFile(owner, repo, ref, path)
 	if err != nil {
 		return nil, err

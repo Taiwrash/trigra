@@ -11,34 +11,34 @@ import (
 	"github.com/google/go-github/v79/github"
 )
 
-// GitHubProvider implements the providers.Provider interface for GitHub.
-type GitHubProvider struct {
+// Provider implements the providers.Provider interface for GitHub.
+type Provider struct {
 	client *github.Client
 }
 
-// NewGitHubProvider creates a new GitHub provider instance.
-func NewGitHubProvider(token string) *GitHubProvider {
+// NewProvider creates a new GitHub provider instance.
+func NewProvider(token string) *Provider {
 	var client *github.Client
 	if token != "" {
 		client = github.NewClient(nil).WithAuthToken(token)
 	} else {
 		client = github.NewClient(nil)
 	}
-	return &GitHubProvider{client: client}
+	return &Provider{client: client}
 }
 
 // Name returns "github".
-func (p *GitHubProvider) Name() string {
+func (p *Provider) Name() string {
 	return "github"
 }
 
 // Validate validates the GitHub webhook payload.
-func (p *GitHubProvider) Validate(r *http.Request, secret string) ([]byte, error) {
+func (p *Provider) Validate(r *http.Request, secret string) ([]byte, error) {
 	return github.ValidatePayload(r, []byte(secret))
 }
 
 // ParsePushEvent parses a GitHub push event payload.
-func (p *GitHubProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
+func (p *Provider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (p *GitHubProvider) ParsePushEvent(r *http.Request, payload []byte) (*provi
 }
 
 // DownloadFile downloads a file from GitHub.
-func (p *GitHubProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
+func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
 	fileReader, _, err := p.client.Repositories.DownloadContents(
 		ctx,
 		owner,

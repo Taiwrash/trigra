@@ -12,26 +12,26 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-// GitLabProvider implements the providers.Provider interface for GitLab.
-type GitLabProvider struct {
+// Provider implements the providers.Provider interface for GitLab.
+type Provider struct {
 	//nolint:staticcheck
 	client *gitlab.Client
 }
 
-// NewGitLabProvider creates a new GitLab provider instance.
-func NewGitLabProvider(token string) *GitLabProvider {
+// NewProvider creates a new GitLab provider instance.
+func NewProvider(token string) *Provider {
 	//nolint:staticcheck
 	client, _ := gitlab.NewClient(token)
-	return &GitLabProvider{client: client}
+	return &Provider{client: client}
 }
 
 // Name returns "gitlab".
-func (p *GitLabProvider) Name() string {
+func (p *Provider) Name() string {
 	return "gitlab"
 }
 
 // Validate validates the GitLab webhook payload.
-func (p *GitLabProvider) Validate(r *http.Request, secret string) ([]byte, error) {
+func (p *Provider) Validate(r *http.Request, secret string) ([]byte, error) {
 	// GitLab uses X-Gitlab-Token header for secret validation
 	receivedSecret := r.Header.Get("X-Gitlab-Token")
 	if receivedSecret != secret {
@@ -46,7 +46,7 @@ func (p *GitLabProvider) Validate(r *http.Request, secret string) ([]byte, error
 }
 
 // ParsePushEvent parses a GitLab push event payload.
-func (p *GitLabProvider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
+func (p *Provider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
 	var event gitlab.PushEvent
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (p *GitLabProvider) ParsePushEvent(_ *http.Request, payload []byte) (*provi
 }
 
 // DownloadFile downloads a file from GitLab.
-func (p *GitLabProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
+func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
 	// Project ID can be the path with namespace
 	projectID := fmt.Sprintf("%s/%s", owner, repo)
 	file, _, err := p.client.RepositoryFiles.GetRawFile(projectID, path, &gitlab.GetRawFileOptions{
