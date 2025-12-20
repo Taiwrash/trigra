@@ -20,12 +20,7 @@ Before you begin, ensure you have:
 The fastest way to install Trigra is using our interactive installer. By providing your Git provider details, Trigra can even **automatically register** its webhook for you.
 
 ```bash
-# Optional: Pre-set configuration for zero-touch install
-export GIT_PROVIDER="github"        # or gitlab, gitea
-export GIT_TOKEN="ghp_xxx"          # your PAT
-export PUBLIC_URL="https://xxx.trycloudflare.com"
-
-# Run the installer
+# Run the interactive installer
 curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 

@@ -7,13 +7,6 @@ This guide will help you get Trigra up and running in minutes.
 The fastest way to deploy Trigra to your cluster is using our interactive installer:
 
 ```bash
-# Set your Git provider configuration
-export GIT_PROVIDER="github"
-export GIT_TOKEN="ghp_your_personal_access_token"
-export WEBHOOK_SECRET=$(openssl rand -hex 32)
-export PUBLIC_URL="https://trigra.yourdomain.com" # Required for auto-webhooks
-
-# Run the installer
 curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 

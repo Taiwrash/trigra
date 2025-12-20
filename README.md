@@ -51,13 +51,6 @@ Trigra is a lightweight, high-performance GitOps controller for Kubernetes. It s
 The easiest way to get started is using our **Quick Install** script:
 
 ```bash
-# Set your configuration
-export GIT_PROVIDER="github"
-export GIT_TOKEN="ghp_..."
-export WEBHOOK_SECRET=$(openssl rand -hex 32)
-export PUBLIC_URL="https://trigra.example.com"
-
-# Deploy Trigra
 curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 

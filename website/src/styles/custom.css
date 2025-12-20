@@ -165,8 +165,6 @@ pre {
   /* Pitch black for best contrast */
   border: 1px solid rgba(16, 185, 129, 0.3) !important;
   border-radius: 12px;
-  color: #f1f5f9 !important;
-  /* Default fallback color for code */
 }
 
 /* Inline code */
