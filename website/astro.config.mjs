@@ -64,6 +64,9 @@ export default defineConfig({
 					},
 				},
 			],
+			expressiveCode: {
+				themes: ['github-dark'],
+			},
 		}),
 	],
 });

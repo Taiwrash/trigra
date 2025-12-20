@@ -156,12 +156,17 @@ nav.sidebar,
 }
 
 /* Code blocks */
-.expressive-code,
-pre,
-code {
-  background: rgba(5, 18, 9, 0.9) !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+.expressive-code {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+pre {
+  background: #010402 !important;
+  /* Pitch black for best contrast */
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
   border-radius: 12px;
+  color: #f1f5f9 !important;
+  /* Default fallback color for code */
 }
 
 /* Inline code */
@@ -293,7 +298,7 @@ html {
 article,
 .content,
 .sl-content {
-  color: #e2e8f0 !important;
+  color: #e2e8f0;
 }
 
 p {
