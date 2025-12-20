@@ -1,3 +1,4 @@
+// Package bitbucket provides the Bitbucket implementation of the Provider interface.
 package bitbucket
 
 import (
@@ -12,20 +13,24 @@ import (
 	"github.com/ktrysmt/go-bitbucket"
 )
 
+// BitbucketProvider implements the providers.Provider interface for Bitbucket.
 type BitbucketProvider struct {
 	client *bitbucket.Client
 }
 
+// NewBitbucketProvider creates a new Bitbucket provider instance.
 func NewBitbucketProvider(user, token string) *BitbucketProvider {
 	client, _ := bitbucket.NewBasicAuth(user, token)
 	return &BitbucketProvider{client: client}
 }
 
+// Name returns "bitbucket".
 func (p *BitbucketProvider) Name() string {
 	return "bitbucket"
 }
 
-func (p *BitbucketProvider) Validate(r *http.Request, secret string) ([]byte, error) {
+// Validate validates the Bitbucket webhook payload.
+func (p *BitbucketProvider) Validate(r *http.Request, _ string) ([]byte, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -33,6 +38,7 @@ func (p *BitbucketProvider) Validate(r *http.Request, secret string) ([]byte, er
 	return payload, nil
 }
 
+// ParsePushEvent parses a Bitbucket push event payload.
 func (p *BitbucketProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
 	eventKey := r.Header.Get("X-Event-Key")
 	if eventKey != "repo:push" {
@@ -73,7 +79,8 @@ func (p *BitbucketProvider) ParsePushEvent(r *http.Request, payload []byte) (*pr
 	}, nil
 }
 
-func (p *BitbucketProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
+// DownloadFile downloads a file from Bitbucket.
+func (p *BitbucketProvider) DownloadFile(_ context.Context, owner, repo, ref, path string) ([]byte, error) {
 	res, err := p.client.Repositories.Repository.GetFileBlob(&bitbucket.RepositoryBlobOptions{
 		Owner:    owner,
 		RepoSlug: repo,

@@ -1,3 +1,4 @@
+// Package providers defines the Git provider abstractions for TRIGRA.
 package providers
 
 import (

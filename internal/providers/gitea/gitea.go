@@ -1,3 +1,4 @@
+// Package gitea provides the Gitea implementation of the Provider interface.
 package gitea
 
 import (
@@ -14,11 +15,12 @@ import (
 	"github.com/Taiwrash/trigra/internal/providers"
 )
 
+// GiteaProvider implements the providers.Provider interface for Gitea.
 type GiteaProvider struct {
 	client *gitea.Client
 }
 
-// PushPayload defines the structure of a Gitea push event payload
+// PushPayload defines the structure of a Gitea push event payload.
 type PushPayload struct {
 	Ref     string `json:"ref"`
 	Before  string `json:"before"`
@@ -38,15 +40,18 @@ type PushPayload struct {
 	} `json:"repository"`
 }
 
+// NewGiteaProvider creates a new Gitea provider instance.
 func NewGiteaProvider(baseURL, token string) *GiteaProvider {
 	client, _ := gitea.NewClient(baseURL, gitea.SetToken(token))
 	return &GiteaProvider{client: client}
 }
 
+// Name returns "gitea".
 func (p *GiteaProvider) Name() string {
 	return "gitea"
 }
 
+// Validate validates the Gitea webhook payload.
 func (p *GiteaProvider) Validate(r *http.Request, secret string) ([]byte, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -71,7 +76,8 @@ func (p *GiteaProvider) Validate(r *http.Request, secret string) ([]byte, error)
 	return payload, nil
 }
 
-func (p *GiteaProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
+// ParsePushEvent parses a Gitea push event payload.
+func (p *GiteaProvider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
 	var event PushPayload
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return nil, err
@@ -101,7 +107,8 @@ func (p *GiteaProvider) ParsePushEvent(r *http.Request, payload []byte) (*provid
 	}, nil
 }
 
-func (p *GiteaProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
+// DownloadFile downloads a file from Gitea.
+func (p *GiteaProvider) DownloadFile(_ context.Context, owner, repo, ref, path string) ([]byte, error) {
 	data, _, err := p.client.GetFile(owner, repo, ref, path)
 	if err != nil {
 		return nil, err

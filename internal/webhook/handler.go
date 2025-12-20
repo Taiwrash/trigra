@@ -1,3 +1,4 @@
+// Package webhook provides the HTTP handler for processing Git provider webhooks.
 package webhook
 
 import (
@@ -11,7 +12,7 @@ import (
 	"github.com/Taiwrash/trigra/internal/providers"
 )
 
-// Handler handles Git provider webhook events using various providers
+// Handler handles Git provider webhook events using various providers.
 type Handler struct {
 	applier       *k8s.Applier
 	provider      providers.Provider
@@ -19,7 +20,7 @@ type Handler struct {
 	namespace     string
 }
 
-// NewHandler creates a new agnostic webhook handler
+// NewHandler creates a new agnostic webhook handler.
 func NewHandler(applier *k8s.Applier, provider providers.Provider, webhookSecret, namespace string) *Handler {
 	return &Handler{
 		applier:       applier,
@@ -29,7 +30,7 @@ func NewHandler(applier *k8s.Applier, provider providers.Provider, webhookSecret
 	}
 }
 
-// ServeHTTP handles incoming webhook requests from any supported provider
+// ServeHTTP handles incoming webhook requests from any supported provider.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
@@ -51,7 +52,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Printf("WARNING: Generic parsing failed or non-push event: %v", err)
 		// We can return 200 for health checks/pings that aren't push events
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Event received but not processed (non-push)")
+		_, _ = fmt.Fprintf(w, "Event received but not processed (non-push)")
 		return
 	}
 
@@ -63,10 +64,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Successfully processed %s push event", h.provider.Name())
+	_, _ = fmt.Fprintf(w, "Successfully processed %s push event", h.provider.Name())
 }
 
-// handlePushEvent processes the generic push event
+// handlePushEvent processes the generic push event.
 func (h *Handler) handlePushEvent(ctx context.Context, event *providers.PushEvent) error {
 	log.Printf("INFO: Processing push event from %s/%s on ref %s",
 		event.Owner,
@@ -93,7 +94,7 @@ func (h *Handler) handlePushEvent(ctx context.Context, event *providers.PushEven
 	return nil
 }
 
-// processFile downloads and applies a single YAML file using the provider
+// processFile downloads and applies a single YAML file using the provider.
 func (h *Handler) processFile(ctx context.Context, event *providers.PushEvent, filename string) error {
 	log.Printf("INFO: Downloading file: %s", filename)
 
@@ -114,7 +115,7 @@ func (h *Handler) processFile(ctx context.Context, event *providers.PushEvent, f
 	return nil
 }
 
-// filterYAMLFiles returns only YAML/YML files from the list
+// filterYAMLFiles returns only YAML/YML files from the list.
 func (h *Handler) filterYAMLFiles(files []string) []string {
 	yamlFiles := []string{}
 	for _, file := range files {

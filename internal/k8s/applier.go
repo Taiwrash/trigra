@@ -1,3 +1,4 @@
+// Package k8s provides mechanisms for applying Kubernetes resources using dynamic clients.
 package k8s
 
 import (

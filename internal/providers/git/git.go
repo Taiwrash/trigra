@@ -1,3 +1,4 @@
+// Package git provides a generic Git implementation using local cloning.
 package git
 
 import (
@@ -7,16 +8,20 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Taiwrash/trigra/internal/providers"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
+// GenericGitProvider implements providers.Provider by cloning repositories locally.
 type GenericGitProvider struct {
 	baseDir string
 	repoURL string
 }
 
+// NewGenericGitProvider creates a new generic Git provider.
 func NewGenericGitProvider(repoURL string) *GenericGitProvider {
 	tmpDir, _ := os.MkdirTemp("", "trigra-git-*")
 	return &GenericGitProvider{
@@ -25,13 +30,14 @@ func NewGenericGitProvider(repoURL string) *GenericGitProvider {
 	}
 }
 
+// Name returns "git".
 func (p *GenericGitProvider) Name() string {
 	return "git"
 }
 
-func (p *GenericGitProvider) Validate(r *http.Request, secret string) ([]byte, error) {
+// Validate handles generic webhook validation.
+func (p *GenericGitProvider) Validate(r *http.Request, _ string) ([]byte, error) {
 	// For generic git, we just read the body.
-	// The caller can use X-Trigra-Secret if they want.
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -39,9 +45,9 @@ func (p *GenericGitProvider) Validate(r *http.Request, secret string) ([]byte, e
 	return payload, nil
 }
 
-func (p *GenericGitProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
+// ParsePushEvent parses a generic push event.
+func (p *GenericGitProvider) ParsePushEvent(_ *http.Request, _ []byte) (*providers.PushEvent, error) {
 	// Generic git provider doesn't have a fixed webhook format.
-	// Users can hit /webhook with anything to trigger a sync.
 	return &providers.PushEvent{
 		Owner:         "generic",
 		Repo:          "repo",
@@ -51,7 +57,8 @@ func (p *GenericGitProvider) ParsePushEvent(r *http.Request, payload []byte) (*p
 	}, nil
 }
 
-func (p *GenericGitProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
+// DownloadFile "downloads" a file by reading it from the local clone.
+func (p *GenericGitProvider) DownloadFile(_ context.Context, _, _, ref, path string) ([]byte, error) {
 	if p.repoURL == "" {
 		return nil, fmt.Errorf("GIT_REPO_URL not configured")
 	}
@@ -69,19 +76,42 @@ func (p *GenericGitProvider) DownloadFile(ctx context.Context, owner, repo, ref,
 		r, err = git.PlainOpen(repoDir)
 		if err == nil {
 			w, _ := r.Worktree()
+			// Pull to ensure we have the latest. Ignore already up to date.
 			err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+			if err == git.NoErrAlreadyUpToDate {
+				err = nil
+			}
 		}
 	}
 
-	if err != nil && err != git.NoErrAlreadyUpToDate {
+	if err != nil {
 		return nil, err
 	}
 
-	if path == "." {
-		// This is a special case: we don't return bytes for a directory here.
-		// Higher level logic should handle this.
-		return nil, fmt.Errorf("cannot download directory via DownloadFile")
+	w, err := r.Worktree()
+	if err != nil {
+		return nil, err
 	}
 
-	return os.ReadFile(filepath.Join(repoDir, path))
+	if ref != "HEAD" {
+		err = w.Checkout(&git.CheckoutOptions{
+			Hash: plumbing.NewHash(ref),
+		})
+	} else {
+		err = w.Checkout(&git.CheckoutOptions{
+			Branch: plumbing.NewBranchReferenceName("main"), // Fallback/default logic
+		})
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Sanitize path to prevent path traversal (Fix G304)
+	cleanPath := filepath.Join(repoDir, filepath.Clean(path))
+	if !strings.HasPrefix(cleanPath, filepath.Clean(repoDir)) {
+		return nil, fmt.Errorf("traversal attack detected: %s", path)
+	}
+
+	return os.ReadFile(cleanPath)
 }

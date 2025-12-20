@@ -1,3 +1,4 @@
+// Package gitlab provides the GitLab implementation of the Provider interface.
 package gitlab
 
 import (
@@ -11,19 +12,25 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
+// GitLabProvider implements the providers.Provider interface for GitLab.
 type GitLabProvider struct {
+	//nolint:staticcheck
 	client *gitlab.Client
 }
 
+// NewGitLabProvider creates a new GitLab provider instance.
 func NewGitLabProvider(token string) *GitLabProvider {
+	//nolint:staticcheck
 	client, _ := gitlab.NewClient(token)
 	return &GitLabProvider{client: client}
 }
 
+// Name returns "gitlab".
 func (p *GitLabProvider) Name() string {
 	return "gitlab"
 }
 
+// Validate validates the GitLab webhook payload.
 func (p *GitLabProvider) Validate(r *http.Request, secret string) ([]byte, error) {
 	// GitLab uses X-Gitlab-Token header for secret validation
 	receivedSecret := r.Header.Get("X-Gitlab-Token")
@@ -38,7 +45,8 @@ func (p *GitLabProvider) Validate(r *http.Request, secret string) ([]byte, error
 	return payload, nil
 }
 
-func (p *GitLabProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
+// ParsePushEvent parses a GitLab push event payload.
+func (p *GitLabProvider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
 	var event gitlab.PushEvent
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return nil, err
@@ -72,6 +80,7 @@ func (p *GitLabProvider) ParsePushEvent(r *http.Request, payload []byte) (*provi
 	}, nil
 }
 
+// DownloadFile downloads a file from GitLab.
 func (p *GitLabProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
 	// Project ID can be the path with namespace
 	projectID := fmt.Sprintf("%s/%s", owner, repo)

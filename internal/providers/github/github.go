@@ -1,3 +1,4 @@
+// Package github provides the GitHub implementation of the Provider interface.
 package github
 
 import (
@@ -10,10 +11,12 @@ import (
 	"github.com/google/go-github/v79/github"
 )
 
+// GitHubProvider implements the providers.Provider interface for GitHub.
 type GitHubProvider struct {
 	client *github.Client
 }
 
+// NewGitHubProvider creates a new GitHub provider instance.
 func NewGitHubProvider(token string) *GitHubProvider {
 	var client *github.Client
 	if token != "" {
@@ -24,14 +27,17 @@ func NewGitHubProvider(token string) *GitHubProvider {
 	return &GitHubProvider{client: client}
 }
 
+// Name returns "github".
 func (p *GitHubProvider) Name() string {
 	return "github"
 }
 
+// Validate validates the GitHub webhook payload.
 func (p *GitHubProvider) Validate(r *http.Request, secret string) ([]byte, error) {
 	return github.ValidatePayload(r, []byte(secret))
 }
 
+// ParsePushEvent parses a GitHub push event payload.
 func (p *GitHubProvider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
@@ -44,6 +50,8 @@ func (p *GitHubProvider) ParsePushEvent(r *http.Request, payload []byte) (*provi
 	}
 
 	modifiedFiles := make(map[string]bool)
+	// Suppress SA1019: Commits is deprecated but used for efficiency in the webhook payload.
+	//nolint:staticcheck
 	for _, commit := range pushEvent.Commits {
 		for _, file := range commit.Added {
 			modifiedFiles[file] = true
@@ -67,6 +75,7 @@ func (p *GitHubProvider) ParsePushEvent(r *http.Request, payload []byte) (*provi
 	}, nil
 }
 
+// DownloadFile downloads a file from GitHub.
 func (p *GitHubProvider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
 	fileReader, _, err := p.client.Repositories.DownloadContents(
 		ctx,
@@ -80,7 +89,7 @@ func (p *GitHubProvider) DownloadFile(ctx context.Context, owner, repo, ref, pat
 	if err != nil {
 		return nil, err
 	}
-	defer fileReader.Close()
+	defer func() { _ = fileReader.Close() }()
 
 	return io.ReadAll(fileReader)
 }

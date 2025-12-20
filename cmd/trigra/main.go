@@ -1,3 +1,4 @@
+// Package main is the entry point for the Trigra GitOps controller.
 package main
 
 import (
@@ -22,7 +23,9 @@ import (
 )
 
 var (
-	Version   = "dev"
+	// Version is the application version, set at build time.
+	Version = "dev"
+	// BuildTime is the time the application was built, set at build time.
 	BuildTime = "unknown"
 )
 
@@ -64,21 +67,24 @@ func main() {
 
 	// 5. Start Server
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.ServerPort),
-		Handler: nil, // Use DefaultServeMux
+		Addr:              fmt.Sprintf(":%d", cfg.ServerPort),
+		Handler:           nil,             // Use DefaultServeMux
+		ReadHeaderTimeout: 3 * time.Second, // Fix G112: Slowloris Attack
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
 	}
 
 	// Register webhook endpoint
 	http.Handle("/webhook", handler)
 
 	// Add health check endpoints
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "OK")
+		_, _ = fmt.Fprintf(w, "OK")
 	})
-	http.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Ready")
+		_, _ = fmt.Fprintf(w, "Ready")
 	})
 
 	// Create a channel to listen for OS signals

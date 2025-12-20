@@ -1,3 +1,4 @@
+// Package config provides configuration management for TRIGRA.
 package config
 
 import (
@@ -6,7 +7,7 @@ import (
 	"strconv"
 )
 
-// Config holds all configuration for the GitOps controller
+// Config holds all configuration for the GitOps controller.
 type Config struct {
 	// Git provider configuration
 	GitProvider   string // "github", "gitlab", etc.
@@ -25,7 +26,7 @@ type Config struct {
 	GitBaseURL string
 }
 
-// Load reads configuration from environment variables
+// Load reads configuration from environment variables.
 func Load() (*Config, error) {
 	cfg := &Config{
 		GitProvider:   getEnvOrDefault("GIT_PROVIDER", "github"),
@@ -57,7 +58,7 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-// Validate checks if all required configuration is present
+// Validate checks if all required configuration is present.
 func Validate(cfg *Config) error {
 	if cfg.WebhookSecret == "" {
 		return fmt.Errorf("WEBHOOK_SECRET is required")

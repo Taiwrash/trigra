@@ -41,15 +41,18 @@ func TestGetEnvOrDefault(t *testing.T) {
 	def := "default_value"
 
 	// Test default
-	os.Unsetenv(key)
+	_ = os.Unsetenv(key)
 	if val := getEnvOrDefault(key, def); val != def {
 		t.Errorf("getEnvOrDefault() = %v, want %v", val, def)
 	}
 
 	// Test env value
 	expected := "env_value"
-	os.Setenv(key, expected)
-	defer os.Unsetenv(key)
+	if err := os.Setenv(key, expected); err != nil {
+		t.Fatalf("os.Setenv() failed: %v", err)
+	}
+	defer func() { _ = os.Unsetenv(key) }()
+
 	if val := getEnvOrDefault(key, def); val != expected {
 		t.Errorf("getEnvOrDefault() = %v, want %v", val, expected)
 	}
