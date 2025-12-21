@@ -22,12 +22,15 @@ type Provider struct {
 
 // NewProvider creates a new GitLab provider instance.
 func NewProvider(baseURL, token string) *Provider {
+	//nolint:staticcheck
 	var client *gitlab.Client
 	var err error
 
 	if baseURL != "" {
+		//nolint:staticcheck
 		client, err = gitlab.NewClient(token, gitlab.WithBaseURL(baseURL))
 	} else {
+		//nolint:staticcheck
 		client, err = gitlab.NewClient(token)
 	}
 
