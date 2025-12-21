@@ -40,7 +40,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	payload, err := h.provider.Validate(r, h.webhookSecret)
 	if err != nil {
 		log.Printf("ERROR: Invalid webhook payload for %s: %v", h.provider.Name(), err)
-		http.Error(w, "Invalid payload", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Validation failed: %v", err), http.StatusBadRequest)
 		return
 	}
 
