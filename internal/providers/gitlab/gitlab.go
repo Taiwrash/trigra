@@ -89,10 +89,9 @@ func (p *Provider) ParsePushEvent(r *http.Request, payload []byte) (*providers.P
 		files = append(files, f)
 	}
 
-	// Use PathWithNamespace to handle groups/subgroups correctly
-	parts := strings.Split(event.Project.PathWithNamespace, "/")
-	owner := strings.Join(parts[:len(parts)-1], "/")
-	repo := parts[len(parts)-1]
+	// Use numeric ProjectID for unambiguous identification in API calls
+	owner := fmt.Sprintf("%d", event.ProjectID)
+	repo := "" // Always empty when using numeric ID
 
 	return &providers.PushEvent{
 		Owner:         owner,
@@ -105,11 +104,24 @@ func (p *Provider) ParsePushEvent(r *http.Request, payload []byte) (*providers.P
 
 // DownloadFile downloads a file from GitLab.
 func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
-	// Project ID is the path with namespace
-	projectID := fmt.Sprintf("%s/%s", owner, repo)
+	// Project ID can be numeric ID (from webhooks) or path (from manual setup)
+	projectID := owner
+	if repo != "" {
+		projectID = fmt.Sprintf("%s/%s", owner, repo)
+	}
+
+	// Try with the provided ref (usually SHA)
 	file, _, err := p.client.RepositoryFiles.GetRawFile(projectID, path, &gitlab.GetRawFileOptions{
 		Ref: gitlab.Ptr(ref),
 	}, gitlab.WithContext(ctx))
+
+	// If 404 and ref looks like a SHA, it might be a 'Test' push payload or a race condition.
+	// Try falling back to branch name if available (ref in PushEvent often contains refs/heads/branch)
+	if err != nil && strings.Contains(err.Error(), "404") && len(ref) == 40 {
+		log.Printf("DEBUG: 404 for SHA %s, attempting fallback to project default branch", ref)
+		file, _, err = p.client.RepositoryFiles.GetRawFile(projectID, path, nil, gitlab.WithContext(ctx))
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +130,10 @@ func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path stri
 
 // SetupWebhook ensures a GitLab webhook is configured.
 func (p *Provider) SetupWebhook(ctx context.Context, owner, repo, url, secret string) error {
-	projectID := fmt.Sprintf("%s/%s", owner, repo)
+	projectID := owner
+	if repo != "" {
+		projectID = fmt.Sprintf("%s/%s", owner, repo)
+	}
 
 	hooks, _, err := p.client.Projects.ListProjectHooks(projectID, &gitlab.ListProjectHooksOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
