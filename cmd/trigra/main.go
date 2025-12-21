@@ -52,7 +52,7 @@ func main() {
 	case "github":
 		provider = github.NewProvider(cfg.GitToken)
 	case "gitlab":
-		provider = gitlab.NewProvider(cfg.GitToken)
+		provider = gitlab.NewProvider(cfg.GitBaseURL, cfg.GitToken)
 	case "gitea":
 		provider = gitea.NewProvider(cfg.GitBaseURL, cfg.GitToken)
 	case "bitbucket":
@@ -126,14 +126,24 @@ func setupWebhooks(cfg *config.Config, p providers.Provider) {
 
 	// Try to auto-parse if missing
 	if (owner == "" || repo == "") && cfg.GitRepoURL != "" {
-		parts := strings.Split(strings.TrimSuffix(cfg.GitRepoURL, ".git"), "/")
-		if len(parts) >= 2 {
-			repo = parts[len(parts)-1]
-			owner = parts[len(parts)-2]
-			// Handle SSH URLs like git@github.com:owner/repo
-			if strings.Contains(owner, ":") {
-				ownerParts := strings.Split(owner, ":")
-				owner = ownerParts[len(ownerParts)-1]
+		// Handle HTTPS URLs
+		if strings.HasPrefix(cfg.GitRepoURL, "http") {
+			path := strings.TrimPrefix(cfg.GitRepoURL, "https://")
+			path = strings.TrimPrefix(path, "http://")
+			path = strings.TrimSuffix(path, ".git")
+			parts := strings.Split(path, "/")
+			if len(parts) >= 2 {
+				repo = parts[len(parts)-1]
+				owner = strings.Join(parts[1:len(parts)-1], "/")
+			}
+		} else if strings.Contains(cfg.GitRepoURL, "@") && strings.Contains(cfg.GitRepoURL, ":") {
+			// Handle SSH URLs like git@github.com:owner/repo.git or git@gitlab.com:group/subgroup/repo.git
+			path := strings.Split(cfg.GitRepoURL, ":")[1]
+			path = strings.TrimSuffix(path, ".git")
+			parts := strings.Split(path, "/")
+			if len(parts) >= 2 {
+				repo = parts[len(parts)-1]
+				owner = strings.Join(parts[:len(parts)-1], "/")
 			}
 		}
 	}

@@ -40,6 +40,36 @@ spec:
             secretKeyRef:
               name: trigra-secret
               key: WEBHOOK_SECRET
+        - name: GIT_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: GIT_BASE_URL
+              optional: true
+        - name: PUBLIC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: PUBLIC_URL
+              optional: true
+        - name: GIT_OWNER
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: GIT_OWNER
+              optional: true
+        - name: GIT_REPO
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: GIT_REPO
+              optional: true
+        - name: GIT_SSH_KEY_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: trigra-config
+              key: GIT_SSH_KEY_FILE
+              optional: true
         - name: SERVER_PORT
           value: "8082"
         - name: NAMESPACE

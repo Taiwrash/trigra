@@ -100,6 +100,11 @@ kubectl create secret generic trigra-secret \
 kubectl create configmap trigra-config \
     --from-literal=GIT_PROVIDER="$GIT_PROVIDER" \
     --from-literal=NAMESPACE="$NAMESPACE" \
+    $( [ -n "$GIT_BASE_URL" ] && echo "--from-literal=GIT_BASE_URL=$GIT_BASE_URL" ) \
+    $( [ -n "$PUBLIC_URL" ] && echo "--from-literal=PUBLIC_URL=$PUBLIC_URL" ) \
+    $( [ -n "$GIT_OWNER" ] && echo "--from-literal=GIT_OWNER=$GIT_OWNER" ) \
+    $( [ -n "$GIT_REPO" ] && echo "--from-literal=GIT_REPO=$GIT_REPO" ) \
+    $( [ -n "$GIT_SSH_KEY_FILE" ] && echo "--from-literal=GIT_SSH_KEY_FILE=$GIT_SSH_KEY_FILE" ) \
     --namespace="$NAMESPACE" \
     --dry-run=client -o yaml | kubectl apply -f -
 

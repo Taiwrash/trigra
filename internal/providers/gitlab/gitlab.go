@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/Taiwrash/trigra/internal/providers"
 	"github.com/xanzy/go-gitlab"
@@ -19,9 +21,20 @@ type Provider struct {
 }
 
 // NewProvider creates a new GitLab provider instance.
-func NewProvider(token string) *Provider {
-	//nolint:staticcheck
-	client, _ := gitlab.NewClient(token)
+func NewProvider(baseURL, token string) *Provider {
+	var client *gitlab.Client
+	var err error
+
+	if baseURL != "" {
+		client, err = gitlab.NewClient(token, gitlab.WithBaseURL(baseURL))
+	} else {
+		client, err = gitlab.NewClient(token)
+	}
+
+	if err != nil {
+		log.Printf("ERROR: Failed to create GitLab client: %v", err)
+	}
+
 	return &Provider{client: client}
 }
 
@@ -34,8 +47,8 @@ func (p *Provider) Name() string {
 func (p *Provider) Validate(r *http.Request, secret string) ([]byte, error) {
 	// GitLab uses X-Gitlab-Token header for secret validation
 	receivedSecret := r.Header.Get("X-Gitlab-Token")
-	if receivedSecret != "" && receivedSecret != secret {
-		return nil, fmt.Errorf("invalid gitlab secret")
+	if secret != "" && receivedSecret != secret {
+		return nil, fmt.Errorf("invalid or missing gitlab secret")
 	}
 
 	payload, err := io.ReadAll(r.Body)
@@ -46,14 +59,20 @@ func (p *Provider) Validate(r *http.Request, secret string) ([]byte, error) {
 }
 
 // ParsePushEvent parses a GitLab push event payload.
-func (p *Provider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.PushEvent, error) {
+func (p *Provider) ParsePushEvent(r *http.Request, payload []byte) (*providers.PushEvent, error) {
+	eventKey := r.Header.Get("X-Gitlab-Event")
+	if eventKey != "" && eventKey != "Push Hook" && eventKey != "Tag Push Hook" {
+		return nil, fmt.Errorf("ignoring gitlab event: %s", eventKey)
+	}
+
 	var event gitlab.PushEvent
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return nil, err
 	}
 
-	if event.ObjectKind != "push" {
-		return nil, fmt.Errorf("not a push event")
+	// Some payloads don't have ObjectKind set but are still push events
+	if event.ObjectKind != "" && event.ObjectKind != "push" && event.ObjectKind != "tag_push" {
+		return nil, fmt.Errorf("not a push event: %s", event.ObjectKind)
 	}
 
 	modifiedFiles := make(map[string]bool)
@@ -71,9 +90,14 @@ func (p *Provider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.P
 		files = append(files, f)
 	}
 
+	// Use PathWithNamespace to handle groups/subgroups correctly
+	parts := strings.Split(event.Project.PathWithNamespace, "/")
+	owner := strings.Join(parts[:len(parts)-1], "/")
+	repo := parts[len(parts)-1]
+
 	return &providers.PushEvent{
-		Owner:         event.Project.Namespace,
-		Repo:          event.Project.Name,
+		Owner:         owner,
+		Repo:          repo,
 		Ref:           event.Ref,
 		After:         event.After,
 		ModifiedFiles: files,
@@ -82,7 +106,7 @@ func (p *Provider) ParsePushEvent(_ *http.Request, payload []byte) (*providers.P
 
 // DownloadFile downloads a file from GitLab.
 func (p *Provider) DownloadFile(ctx context.Context, owner, repo, ref, path string) ([]byte, error) {
-	// Project ID can be the path with namespace
+	// Project ID is the path with namespace
 	projectID := fmt.Sprintf("%s/%s", owner, repo)
 	file, _, err := p.client.RepositoryFiles.GetRawFile(projectID, path, &gitlab.GetRawFileOptions{
 		Ref: gitlab.Ptr(ref),
