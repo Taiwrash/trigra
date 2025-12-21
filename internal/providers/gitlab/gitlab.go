@@ -11,26 +11,22 @@ import (
 	"strings"
 
 	"github.com/Taiwrash/trigra/internal/providers"
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 // Provider implements the providers.Provider interface for GitLab.
 type Provider struct {
-	//nolint:staticcheck
 	client *gitlab.Client
 }
 
 // NewProvider creates a new GitLab provider instance.
 func NewProvider(baseURL, token string) *Provider {
-	//nolint:staticcheck
 	var client *gitlab.Client
 	var err error
 
 	if baseURL != "" {
-		//nolint:staticcheck
 		client, err = gitlab.NewClient(token, gitlab.WithBaseURL(baseURL))
 	} else {
-		//nolint:staticcheck
 		client, err = gitlab.NewClient(token)
 	}
 
