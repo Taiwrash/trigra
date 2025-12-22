@@ -14,6 +14,7 @@ import (
 
 	"github.com/Taiwrash/trigra/internal/config"
 	"github.com/Taiwrash/trigra/internal/k8s"
+	"github.com/Taiwrash/trigra/internal/manager"
 	"github.com/Taiwrash/trigra/internal/providers"
 	"github.com/Taiwrash/trigra/internal/providers/bitbucket"
 	"github.com/Taiwrash/trigra/internal/providers/git"
@@ -46,7 +47,7 @@ func main() {
 		log.Fatalf("Failed to initialize Kubernetes applier: %v", err)
 	}
 
-	// 3. Initialize Git Provider
+	// 3. Initialize Git Provider for Static/Legacy config
 	var provider providers.Provider
 	switch cfg.GitProvider {
 	case "github":
@@ -63,13 +64,41 @@ func main() {
 		log.Fatalf("Unsupported git provider: %s", cfg.GitProvider)
 	}
 
-	// 4. Automated Webhook Setup
+	// 4. Initialize Manager and Controller
+	clientset, err := k8s.GetClientset(cfg.InCluster)
+	if err != nil {
+		log.Fatalf("Failed to initialize Kubernetes clientset: %v", err)
+	}
+	dynClient, err := k8s.GetDynamicClient(cfg.InCluster)
+	if err != nil {
+		log.Fatalf("Failed to initialize dynamic client: %v", err)
+	}
+
+	mgr := manager.NewManager(applier, clientset, dynClient)
+
+	// Register static project from env vars
+	mgr.AddStaticProject(&manager.Project{
+		Name:            "default",
+		URL:             cfg.GitRepoURL,
+		Provider:        provider,
+		WebhookSecret:   cfg.WebhookSecret,
+		TargetNamespace: cfg.Namespace,
+	})
+
+	// Start CRD controller
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := mgr.Start(ctx); err != nil {
+		log.Printf("WARNING: CRD controller failed to start: %v", err)
+	}
+
+	// 5. Automated Webhook Setup (Legacy static project)
 	if cfg.PublicURL != "" {
 		setupWebhooks(cfg, provider)
 	}
 
-	// 5. Initialize Webhook Handler
-	handler := webhook.NewHandler(applier, provider, cfg.WebhookSecret, cfg.Namespace)
+	// 6. Initialize Webhook Handler
+	handler := webhook.NewHandler(applier, mgr)
 
 	// 6. Start Server
 	server := &http.Server{
@@ -110,10 +139,10 @@ func main() {
 	log.Printf("Received signal %s, shutting down...", sig)
 
 	// Graceful shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
 
-	if err := server.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Printf("Server forced to shutdown: %v", err)
 	}
 

@@ -48,6 +48,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Helm Values', slug: 'configuration/helm-values' },
 						{ label: 'Environment Variables', slug: 'configuration/environment' },
+						{ label: 'Custom Resources', slug: 'configuration/custom-resources' },
 						{ label: 'RBAC & Security', slug: 'configuration/security' },
 					],
 				},

@@ -1,0 +1,67 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gitrepos.trigra.io
+spec:
+  group: trigra.io
+  names:
+    kind: GitRepo
+    listKind: GitRepoList
+    plural: gitrepos
+    singular: gitrepo
+    shortNames:
+    - gr
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: "Full URL of the Git repository"
+                provider:
+                  type: string
+                  description: "Git provider (github, gitlab, gitea, bitbucket, git)"
+                  enum: [github, gitlab, gitea, bitbucket, git]
+                tokenSecretRef:
+                  type: object
+                  description: "Reference to a secret containing the Git token"
+                  properties:
+                    name:
+                      type: string
+                    key:
+                      type: string
+                webhookSecretRef:
+                  type: object
+                  description: "Reference to a secret containing the webhook secret"
+                  properties:
+                    name:
+                      type: string
+                    key:
+                      type: string
+                targetNamespace:
+                  type: string
+                  description: "Namespace where resources should be applied"
+                branch:
+                  type: string
+                  description: "Branch to watch (defaults to main/master)"
+              required: ["url", "provider"]
+            status:
+              type: object
+              properties:
+                lastSync:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                message:
+                  type: string

@@ -1,0 +1,15 @@
+apiVersion: trigra.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: sample-app
+  namespace: default
+spec:
+  url: https://github.com/Taiwrash/trigra-sample
+  provider: github
+  targetNamespace: default
+  webhookSecretRef:
+    name: trigra-secret
+    key: WEBHOOK_SECRET
+  tokenSecretRef:
+    name: trigra-secret
+    key: GIT_TOKEN
