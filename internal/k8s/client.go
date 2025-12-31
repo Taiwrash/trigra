@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 )
 
 var (
@@ -73,7 +74,12 @@ func getConfig(inCluster bool) (*rest.Config, error) {
 	}
 
 	// Use kubeconfig file (local development)
-	kubeconfig := filepath.Join("homedir.HomeDir()", ".kube", "config")
+	var kubeconfig string
+	if home := homedir.HomeDir(); home != "" {
+		kubeconfig = filepath.Join(home, ".kube", "config")
+	}
+
+	// Better yet, use the environment variable if present
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build config from kubeconfig: %w", err)
