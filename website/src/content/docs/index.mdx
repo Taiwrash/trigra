@@ -1,53 +1,53 @@
 ---
 title: TRIGRA
-description: Simple, Lightweight GitOps for Any Kubernetes Cluster
+description: The Atomic GitOps Controller for Kubernetes.
 template: splash
 hero:
-  tagline: Deploy to Kubernetes with Git. Simple, Fast, Reliable.
+  tagline: Lightweight, standard-compliant GitOps for Edge, Homelab, and Enterprise.
   image:
     file: ../../assets/logo-dark.svg
   actions:
-    - text: Get Started
+    - text: Initialize Cluster
       link: /trigra/getting-started/quickstart/
       icon: right-arrow
       variant: primary
-    - text: View on GitHub
+    - text: Star on GitHub
       link: https://github.com/Taiwrash/trigra
       icon: external
+      variant: secondary
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## ⚡ One Command Install
+## ⚡ Atomic Installation
 
 ```bash
-# MAKE SURE THERE IS KUBERNETES AND KUBECTL IS INSTALLED BEFORE RUNNING THIS COMMAND
-# THIS WILL INSTALL TRIGRA IN DEFAULT NAMESPACE
-# IF YOU WANT TO INSTALL IN A DIFFERENT NAMESPACE, RUN THE FOLLOWING COMMAND
-# curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/install.sh | bash -s -- <namespace>
+# Initialize TRIGRA on your cluster in seconds.
+# Requires: Kubernetes v1.24+ and kubectl.
+
 curl -fsSL https://raw.githubusercontent.com/Taiwrash/trigra/main/quick-install.sh | bash
 ```
 
 ## Why TRIGRA?
 
 <CardGrid stagger>
-  <Card title="🚀 Universal Support" icon="rocket">
-    Deploy any Kubernetes resource - Deployments, Services, ConfigMaps, Secrets, and more.
+  <Card title="Universal Applier" icon="rocket">
+    Standard Kubernetes orchestration for any resource type. Deploy CRDs, Helm releases, or raw YAML with zero friction.
   </Card>
-  <Card title="🏠 Homelab Ready" icon="laptop">
-    Optimized for multi-node homelab clusters with built-in HA support.
+  <Card title="Edge & Homelab Optimized" icon="laptop">
+    Designed for resource-constrained environments. Perfect for multi-node K3s/RKE2 clusters and edge computing.
   </Card>
-  <Card title="⚡ Auto-Detect" icon="setting">
-    Automatically detects in-cluster vs out-of-cluster mode.
+  <Card title="Instant Auto-Detection" icon="setting">
+    Zero-config intelligence. TRIGRA detects if it's running in-cluster or remotely and configures its context accordingly.
   </Card>
-  <Card title="🔒 Secure" icon="approve-check">
-    Webhook validation, RBAC, and secret management built-in.
+  <Card title="Enterprise Security" icon="approve-check">
+    Production-grade security with SHA-256 webhook validation, scoped RBAC, and native Kubernetes secret integration.
   </Card>
-  <Card title="📦 Helm Chart" icon="document">
-    Full Helm chart with customizable values for easy deployment.
+  <Card title="Standardized Workflow" icon="pencil">
+    Eliminate 'kubectl' manual apply. Commit to Git, and let the controller handle atomic updates and state reconciliation.
   </Card>
-  <Card title="🎯 GitOps Native" icon="pencil">
-    Edit YAML, commit to Git, watch it deploy automatically.
+  <Card title="Modern Tooling" icon="document">
+    Built for the modern stack. Includes first-class Helm support, CI/CD integration, and a sleek developer portal.
   </Card>
 </CardGrid>
 

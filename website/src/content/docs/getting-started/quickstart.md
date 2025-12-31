@@ -3,8 +3,6 @@ title: Quick Start
 description: Get TRIGRA running on your cluster in 5 minutes
 ---
 
-# Quick Start
-
 Get TRIGRA up and running on your Kubernetes cluster in under 5 minutes.
 
 ## Prerequisites
@@ -57,6 +55,22 @@ After installation, you'll see output like:
    - **Secret**: Your webhook secret (shown during install)
    - **Events**: Just the push event
 
+
+## Verify Installation
+
+Check that everything is running:
+
+```bash
+# Check deployment
+kubectl get deployment trigra
+
+# Check pods
+kubectl get pods -l app=trigra
+
+# View logs
+kubectl logs -f deployment/trigra
+```
+
 ## Test Your Setup
 
 Create a simple deployment in your repository:
@@ -96,20 +110,6 @@ Watch it deploy:
 kubectl get deployments -w
 ```
 
-## Verify Installation
-
-Check that everything is running:
-
-```bash
-# Check deployment
-kubectl get deployment trigra
-
-# Check pods
-kubectl get pods -l app=trigra
-
-# View logs
-kubectl logs -f deployment/trigra
-```
 
 ## Next Steps
 

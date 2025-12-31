@@ -77,12 +77,31 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // handlePushEvent processes a GitHub push event
 func (h *Handler) handlePushEvent(ctx context.Context, event *github.PushEvent) error {
-	log.Printf("INFO: Processing push event from %s/%s",
-		event.Repo.GetOwner().GetName(),
-		event.Repo.GetName())
+	owner := event.GetRepo().GetOwner().GetLogin()
+	repo := event.GetRepo().GetName()
 
-	// Get all modified/added files from commits
-	files := h.getModifiedFiles(event.Commits)
+	log.Printf("INFO: Processing push event from %s/%s", owner, repo)
+
+	var files []string
+	if event.GetBefore() == "0000000000000000000000000000000000000000" {
+		// New branch/push - get files from the single commit
+		commit, _, err := h.githubClient.Repositories.GetCommit(ctx, owner, repo, event.GetAfter(), nil)
+		if err != nil {
+			return fmt.Errorf("failed to get commit: %w", err)
+		}
+		for _, f := range commit.Files {
+			files = append(files, f.GetFilename())
+		}
+	} else {
+		// Existing branch - compare range
+		comp, _, err := h.githubClient.Repositories.CompareCommits(ctx, owner, repo, event.GetBefore(), event.GetAfter(), nil)
+		if err != nil {
+			return fmt.Errorf("failed to compare commits: %w", err)
+		}
+		for _, f := range comp.Files {
+			files = append(files, f.GetFilename())
+		}
+	}
 
 	// Filter for YAML files only
 	yamlFiles := h.filterYAMLFiles(files)
@@ -138,31 +157,6 @@ func (h *Handler) processFile(ctx context.Context, event *github.PushEvent, file
 
 	log.Printf("SUCCESS: Applied resources from file: %s", filename)
 	return nil
-}
-
-// getModifiedFiles extracts all modified and added files from commits
-func (h *Handler) getModifiedFiles(commits []*github.HeadCommit) []string {
-	fileSet := make(map[string]bool)
-
-	for _, commit := range commits {
-		// Add all added files
-		for _, file := range commit.Added {
-			fileSet[file] = true
-		}
-
-		// Add all modified files
-		for _, file := range commit.Modified {
-			fileSet[file] = true
-		}
-	}
-
-	// Convert set to slice
-	files := make([]string, 0, len(fileSet))
-	for file := range fileSet {
-		files = append(files, file)
-	}
-
-	return files
 }
 
 // filterYAMLFiles returns only YAML/YML files from the list
