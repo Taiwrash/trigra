@@ -1,309 +1,252 @@
-/* TRIGRA Custom Styles for Starlight */
+/* TRIGRA Premium Design System for Starlight */
 
 :root {
-  /* Brand Colors - Green Theme */
-  --sl-color-accent-low: #0d3320;
+  /* Brand Colors - Modern Emerald Theme */
+  --sl-color-accent-low: #064e3b;
   --sl-color-accent: #10b981;
   --sl-color-accent-high: #34d399;
 
-  /* Dark Theme Backgrounds */
-  --sl-color-bg: #030b05;
-  --sl-color-bg-nav: #051209;
-  --sl-color-bg-sidebar: #051209;
-  --sl-color-hairline: rgba(16, 185, 129, 0.3);
+  /* Dark Theme Palette - Deep & Clean */
+  --sl-color-bg: #0b120f;
+  --sl-color-bg-nav: #0d1612;
+  --sl-color-bg-sidebar: #0d1612;
+  --sl-color-hairline: rgba(16, 185, 129, 0.2);
 
-  /* Text Colors - High Contrast */
-  --sl-color-text: #f1f5f9;
+  /* Text Colors - Optimized for Readability */
+  --sl-color-text: #f8fafc;
   --sl-color-text-accent: #10b981;
+  --sl-color-text-invert: #0b120f;
 
-  /* Code Blocks */
-  --sl-color-bg-inline-code: rgba(16, 185, 129, 0.15);
+  /* Card & Gray Scale */
+  --sl-color-black: #0b120f;
+  --sl-color-gray-1: #1a2421;
+  --sl-color-gray-2: #2d3a35;
+  --sl-color-gray-3: #4a5d57;
+  --sl-color-gray-4: #718881;
+  --sl-color-gray-5: #94a9a2;
+  --sl-color-gray-6: #cbd5d1;
+  --sl-color-white: #ffffff;
 
-  /* Card backgrounds */
-  --sl-color-black: #030b05;
-  --sl-color-gray-1: #0a1f10;
-  --sl-color-gray-2: #0d2915;
-  --sl-color-gray-3: #10331a;
-  --sl-color-gray-4: #1a4d28;
-  --sl-color-gray-5: #2d6b3f;
-  --sl-color-gray-6: #4a9960;
-  --sl-color-white: #f8fafc;
+  /* Code Block System Overrides */
+  --ec-bg: #0d1117;
+  --ec-brdCol: rgba(16, 185, 129, 0.3);
 }
 
-/* Force dark theme */
+/* Base Styles */
+body {
+  font-family: 'Inter', 'Outfit', system-ui, sans-serif;
+  background-color: var(--sl-color-bg);
+}
+
+/* Force dark theme defaults */
 :root,
 [data-theme='dark'] {
-  --sl-color-bg: #030b05;
-  --sl-color-bg-nav: #051209;
-  --sl-color-bg-sidebar: #051209;
+  --sl-color-bg: #0b120f;
+  --sl-color-bg-nav: #0d1612;
+  --sl-color-bg-sidebar: #0d1612;
 }
 
-/* Card styling - dark background with visible text */
-.card,
-.sl-card,
-[class*="card"] {
-  background: rgba(10, 31, 16, 0.9) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
-  color: #f1f5f9 !important;
-}
-
-.card:hover,
-.sl-card:hover {
-  background: rgba(16, 51, 26, 0.95) !important;
-  border-color: rgba(16, 185, 129, 0.5) !important;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
-}
-
-/* Card titles */
-.card h2,
-.card h3,
-.sl-card h2,
-.sl-card h3,
-[class*="card"] h2,
-[class*="card"] h3 {
-  color: #10b981 !important;
-}
-
-/* Card descriptions */
-.card p,
-.sl-card p,
-[class*="card"] p {
-  color: #cbd5e1 !important;
-}
-
-/* Link cards */
-.sl-link-card,
-a[class*="card"] {
-  background: rgba(10, 31, 16, 0.9) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
-}
-
-.sl-link-card:hover,
-a[class*="card"]:hover {
-  background: rgba(16, 51, 26, 0.95) !important;
-  border-color: #10b981 !important;
-}
-
-/* Link card text */
-.sl-link-card span,
-.sl-link-card p {
-  color: #f1f5f9 !important;
-}
-
-/* Hero section */
-.hero {
-  background: linear-gradient(135deg, #030b05 0%, #051209 100%) !important;
-}
-
-/* Hero tagline - make it visible */
-.hero .tagline,
-.sl-hero .tagline,
-[class*="hero"] .tagline,
-.hero p,
-.sl-hero p {
-  color: #f1f5f9 !important;
-  opacity: 1 !important;
-  font-size: 1.25rem !important;
-}
-
-/* Primary buttons - ensure text is visible */
-.sl-link-button[data-variant='primary'],
-[data-variant='primary'],
-.hero a[data-variant='primary'],
-.sl-hero a {
-  background: linear-gradient(135deg, #10b981, #34d399) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
-  transition: all 0.3s ease;
-}
-
-/* Button text specifically */
-.sl-link-button span,
-.sl-link-button,
-a[data-variant] span,
-a[data-variant] {
-  color: #ffffff !important;
-}
-
-.sl-link-button[data-variant='primary']:hover,
-[data-variant='primary']:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
-}
-
-/* Secondary buttons */
-.sl-link-button[data-variant='secondary'],
-[data-variant='secondary'] {
-  background: transparent !important;
-  border: 2px solid #10b981 !important;
-  color: white !important;
-}
-
-/* Sidebar */
-nav.sidebar,
-.sidebar {
-  background: #051209 !important;
-}
-
-.sidebar a {
-  color: #94a3b8 !important;
-}
-
-.sidebar a:hover,
-.sidebar a[aria-current="page"] {
-  color: #10b981 !important;
-}
-
-/* Code blocks */
-.expressive-code,
-pre,
-code {
-  background: rgba(5, 18, 9, 0.9) !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+/* Premium Code Block Styling - CRITICAL FIX FOR READABILITY */
+.expressive-code {
+  margin: 2rem 0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border-radius: 12px;
+  overflow: hidden;
 }
 
-/* Inline code */
+.expressive-code pre {
+  background: #0d1117 !important;
+  /* Standard high-contrast dark background */
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  padding: 1.5rem !important;
+}
+
+.expressive-code code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  background: transparent !important;
+  /* Let syntax highlighting shine */
+}
+
+/* Inline Code Fix */
 :not(pre)>code {
   background: rgba(16, 185, 129, 0.15) !important;
   color: #34d399 !important;
   padding: 0.2em 0.4em;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-weight: 500;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-/* Tables */
-table {
-  background: rgba(10, 31, 16, 0.5) !important;
-}
-
-th {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #10b981 !important;
-}
-
-td {
-  border-color: rgba(16, 185, 129, 0.2) !important;
-}
-
-/* Headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #f1f5f9 !important;
-}
-
+/* Headings with Modern Gradients */
 h1 {
-  background: linear-gradient(135deg, #10b981, #34d399);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  background: linear-gradient(to right, #10b981, #34d399, #6ee7b7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 2rem !important;
 }
 
-/* Links */
-a {
-  color: #10b981;
-}
-
-a:hover {
-  color: #34d399;
-}
-
-/* Header/Navigation */
-header {
-  background: rgba(5, 18, 9, 0.95) !important;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.2) !important;
-}
-
-/* Main content area */
-main {
-  background: #030b05 !important;
-}
-
-/* Right sidebar (table of contents) */
-.right-sidebar,
-aside {
-  background: transparent !important;
-}
-
-/* Badge/tag styling */
-.sl-badge {
-  background: linear-gradient(135deg, #10b981, #34d399) !important;
-  color: white !important;
-}
-
-/* Starlight specific overrides */
-starlight-menu-button {
-  color: #10b981 !important;
-}
-
-/* Search */
-.search-input,
-[type="search"] {
-  background: rgba(10, 31, 16, 0.8) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+h2,
+h3,
+h4 {
   color: #f1f5f9 !important;
+  font-weight: 700;
+  margin-top: 2.5rem !important;
+  margin-bottom: 1rem !important;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* Card Styling - Glassmorphism Effect */
+.card,
+.sl-card {
+  background: rgba(26, 36, 33, 0.6) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 1.5rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Custom scrollbar */
+.card:hover,
+.sl-card:hover {
+  background: rgba(26, 36, 33, 0.8) !important;
+  border-color: #10b981 !important;
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.sl-card .title {
+  color: #10b981 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+}
+
+/* Sidebar & Navigation */
+header {
+  background: rgba(13, 22, 18, 0.8) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15) !important;
+}
+
+.sidebar-content a {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+.sidebar-content a[aria-current="page"] {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #10b981 !important;
+  font-weight: 600 !important;
+}
+
+/* Hero Section Enhancement */
+.hero {
+  padding: 6rem 0 !important;
+}
+
+.hero p {
+  color: #94a3b8 !important;
+  font-size: 1.25rem !important;
+  max-width: 40ch;
+}
+
+/* Buttons */
+.sl-link-button {
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.sl-link-button[data-variant='primary'] {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.sl-link-button[data-variant='primary']:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+
+/* Content Text Styling */
+.sl-content {
+  line-height: 1.7;
+}
+
+.sl-content p,
+.sl-content li {
+  color: #cbd5e1 !important;
+}
+
+.sl-content strong {
+  color: #f8fafc !important;
+  font-weight: 600;
+}
+
+/* Blockquotes */
+blockquote {
+  background: rgba(16, 185, 129, 0.05) !important;
+  border-left: 4px solid #10b981 !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #94a3b8 !important;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #051209;
+  background: #0b120f;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.3);
-  border-radius: 4px;
+  background: #1a2421;
+  border: 2px solid #0b120f;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5);
+  background: #10b981;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .hero h1 {
-    font-size: 2rem;
-  }
-
-  .card,
-  .sl-card {
-    padding: 1rem !important;
-  }
+/* Badge Enhancements */
+.sl-badge {
+  background: #1a2421 !important;
+  border: 1px solid #10b981 !important;
+  color: #10b981 !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
 }
 
-/* CardGrid layout improvements */
-.sl-card-grid {
-  gap: 1.5rem !important;
+/* Table Design */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin: 2rem 0;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-/* Ensure all text is readable */
-article,
-.content,
-.sl-content {
-  color: #e2e8f0 !important;
+th {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #10b981 !important;
+  text-align: left;
+  padding: 1rem !important;
+  font-weight: 700;
 }
 
-p {
-  color: #cbd5e1;
-}
-
-li {
-  color: #cbd5e1;
-}
-
-strong {
-  color: #f1f5f9;
+td {
+  background: rgba(13, 22, 18, 0.5) !important;
+  padding: 1rem !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.05);
 }

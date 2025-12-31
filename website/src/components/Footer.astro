@@ -44,10 +44,10 @@ import type { Props } from '@astrojs/starlight/props';
 
 <style>
   .trigra-footer {
-    background: linear-gradient(180deg, #030b05 0%, #051209 100%);
-    border-top: 1px solid rgba(16, 185, 129, 0.2);
-    padding: 3rem 2rem 1.5rem;
-    margin-top: 4rem;
+    background: linear-gradient(180deg, transparent 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-top: 1px solid rgba(16, 185, 129, 0.15);
+    padding: 4rem 2rem 2rem;
+    margin-top: 6rem;
   }
 
   .footer-content {
@@ -93,7 +93,7 @@ import type { Props } from '@astrojs/starlight/props';
 
   .footer-tagline {
     color: #94a3b8;
-    font-size: 0.95rem;
+    font-size: 1rem;
     margin: 0;
   }
 
@@ -111,10 +111,10 @@ import type { Props } from '@astrojs/starlight/props';
   }
 
   .footer-column h4 {
-    color: #f1f5f9;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
+    color: #f8fafc;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -122,31 +122,32 @@ import type { Props } from '@astrojs/starlight/props';
   .footer-column a {
     color: #94a3b8;
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.2s ease;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
   }
 
   .footer-column a:hover {
     color: #10b981;
+    transform: translateX(4px);
   }
 
   .footer-bottom {
     max-width: 1200px;
-    margin: 2rem auto 0;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(16, 185, 129, 0.1);
+    margin: 3rem auto 0;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(16, 185, 129, 0.15);
     text-align: center;
   }
 
   .footer-bottom p {
-    color: #64748b;
-    font-size: 0.85rem;
-    margin: 0.25rem 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
   }
 
   .footer-copy {
-    color: #475569 !important;
-    font-size: 0.8rem !important;
+    color: #4b5563 !important;
+    font-size: 0.85rem !important;
   }
 
   @media (max-width: 768px) {

@@ -21,6 +21,9 @@ export default defineConfig({
 			customCss: [
 				'./src/styles/custom.css',
 			],
+			expressiveCode: {
+				themes: ['github-dark-high-contrast'],
+			},
 			components: {
 				Footer: './src/components/Footer.astro',
 			},
