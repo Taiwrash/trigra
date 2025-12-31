@@ -55,7 +55,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case *github.PingEvent:
 		log.Printf("INFO: Received ping event from webhook")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "pong")
+		_, _ = fmt.Fprintf(w, "pong")
 		return
 
 	case *github.PushEvent:
@@ -65,7 +65,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Successfully processed push event")
+		_, _ = fmt.Fprintf(w, "Successfully processed push event")
 		return
 
 	default:

@@ -60,11 +60,11 @@ func main() {
 	// Add health check endpoints
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "OK")
+		_, _ = fmt.Fprintf(w, "OK")
 	})
 	http.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Ready")
+		_, _ = fmt.Fprintf(w, "Ready")
 	})
 
 	// Create a channel to listen for OS signals

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 )
@@ -57,7 +58,7 @@ func Validate(cfg *Config) error {
 
 	// GitHub token is optional for public repos, but recommended
 	if cfg.GitHubToken == "" {
-		fmt.Println("WARNING: GITHUB_TOKEN not set. Rate limits will be lower for GitHub API.")
+		log.Println("WARNING: GITHUB_TOKEN not set. Rate limits will be lower for GitHub API.")
 	}
 
 	return nil
