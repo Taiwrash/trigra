@@ -50,8 +50,9 @@ func main() {
 
 	// 5. Start Server
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.ServerPort),
-		Handler: nil, // Use DefaultServeMux
+		Addr:              fmt.Sprintf(":%d", cfg.ServerPort),
+		Handler:           nil, // Use DefaultServeMux
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	// Register webhook endpoint
