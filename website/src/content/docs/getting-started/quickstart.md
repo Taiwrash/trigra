@@ -1,9 +1,12 @@
 ---
 title: Quick Start
-description: Get TRIGRA running on your cluster in 5 minutes
+description: Get TRIGRA running on your cluster in 3 minutes
 ---
 
-Get TRIGRA up and running on your Kubernetes cluster in under 5 minutes.
+Get TRIGRA up and running on your Kubernetes cluster in under 3 minutes.
+
+![](https://app.eraser.io/workspace/QdXTK61OUqZqUE2ocAE7/preview?elements=gJntNtLMFIXvvvYV2TYMNw&type=embed)
+
 
 ## Prerequisites
 

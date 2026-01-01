@@ -2,6 +2,8 @@
 
 A lightweight GitOps controller for Kubernetes homelab clusters that automatically applies changes from your Git repository. Edit YAML files, commit to Git, and watch your cluster update automatically!
 
+![](https://app.eraser.io/workspace/QdXTK61OUqZqUE2ocAE7/preview?elements=gJntNtLMFIXvvvYV2TYMNw&type=embed)
+
 ## 🚀 Features
 
 - **Universal Resource Support**: Deploy any Kubernetes resource type (Deployments, Services, ConfigMaps, Secrets, StatefulSets, DaemonSets, Jobs, CronJobs, Ingress, PVCs, and more)

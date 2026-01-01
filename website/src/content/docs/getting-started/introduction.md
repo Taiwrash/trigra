@@ -45,18 +45,7 @@ See your changes deployed immediately:
 
 ## How It Works
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Your Git  │────▶│   GitHub    │────▶│   TRIGRA    │
-│   Commit    │     │   Webhook   │     │  Controller │
-└─────────────┘     └─────────────┘     └─────┬───────┘
-                                              │
-                                              ▼
-                                    ┌─────────────────┐
-                                    │   Kubernetes    │
-                                    │    Cluster      │
-                                    └─────────────────┘
-```
+![](https://app.eraser.io/workspace/QdXTK61OUqZqUE2ocAE7/preview?elements=gJntNtLMFIXvvvYV2TYMNw&type=embed)
 
 ## Key Features
 

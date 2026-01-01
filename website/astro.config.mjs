@@ -8,7 +8,7 @@ export default defineConfig({
 	base: '/trigra',
 	integrations: [
 		starlight({
-			title: 'TRIGRA',
+			title: 'TRIGRA ⚡',
 			description: 'Lightweight GitOps for Kubernetes - Simple, Fast, Reliable',
 			logo: {
 				light: './src/assets/logo-light.svg',
