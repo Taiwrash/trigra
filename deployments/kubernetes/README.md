@@ -2,6 +2,8 @@
 
 This guide will help you deploy Trigra (Kubernetes GitOps Controller) to your Kubernetes cluster.
 
+![](https://app.eraser.io/workspace/QdXTK61OUqZqUE2ocAE7/preview?elements=gJntNtLMFIXvvvYV2TYMNw&type=embed)
+
 ## Prerequisites
 
 - A running Kubernetes cluster
