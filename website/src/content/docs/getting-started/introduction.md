@@ -3,7 +3,6 @@ title: Introduction
 description: What is TRIGRA and why should you use it?
 ---
 
-# Welcome to TRIGRA
 
 **TRIGRA** (Trigger + Infra) is a lightweight GitOps controller for Kubernetes that enables continuous deployment through Git commits. Simply push changes to your repository, and TRIGRA automatically deploys them to your cluster.
 

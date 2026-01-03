@@ -275,6 +275,23 @@ h3 {
   margin: 3rem 0 1.5rem !important;
 }
 
+/* Product Hunt Badge Theme Switching */
+html[data-theme='light'] .ph-dark {
+  display: none !important;
+}
+
+html[data-theme='light'] .ph-light {
+  display: block !important;
+}
+
+[data-theme='dark'] .ph-light {
+  display: none !important;
+}
+
+[data-theme='dark'] .ph-dark {
+  display: block !important;
+}
+
 /* Sidebar & Navigation */
 header {
   border-bottom: 1px solid rgba(16, 185, 129, 0.1) !important;

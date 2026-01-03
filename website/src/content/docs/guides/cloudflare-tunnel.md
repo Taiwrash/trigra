@@ -3,7 +3,6 @@ title: Cloudflare Tunnel
 description: Securely expose your TRIGRA webhook to the internet
 ---
 
-# Cloudflare Tunnel
 
 Cloudflare Tunnel allows you to expose your TRIGRA webhook endpoint to the internet without opening ports or configuring firewalls.
 

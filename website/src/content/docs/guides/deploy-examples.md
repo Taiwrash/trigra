@@ -3,7 +3,6 @@ title: Deploy Examples
 description: Ready-to-deploy example applications for your cluster
 ---
 
-# Deploy Examples
 
 TRIGRA comes with ready-to-deploy examples for common homelab use cases.
 

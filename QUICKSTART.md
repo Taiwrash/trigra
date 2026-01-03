@@ -2,6 +2,35 @@
 
 This is a quick reference for common tasks. See [README.md](README.md) for full documentation.
 
+## ⚠️ Before You Start
+
+**CRITICAL: Read this before deploying TRIGRA**
+
+### Security & Operational Warnings
+
+- ⚠️ **Automatic Deployment**: TRIGRA automatically applies ALL changes from Git. A bad manifest can delete resources or cause outages.
+- 🔐 **Broad Permissions**: TRIGRA needs extensive RBAC permissions. Review `rbac.yaml` and limit to your needs.
+- 🚨 **No Auto-Rollback**: Failed deployments won't rollback automatically. You must manually fix or revert.
+- 🔒 **Secret Safety**: NEVER commit `.env` or `secret.yaml` files. Add to `.gitignore` immediately.
+- 🧪 **Test First**: Always validate manifests locally before pushing:
+  ```bash
+  kubectl apply --dry-run=client -f your-manifest.yaml
+  ```
+
+### Best Practices
+
+1. **Start in a test namespace** with non-critical workloads
+2. **Use Git branches** to test changes before merging to main
+3. **Monitor logs** regularly: `kubectl logs -f deployment/trigra`
+4. **Have a rollback plan** ready before deploying changes
+
+### Recommended For
+
+✅ Homelabs, dev clusters, learning environments  
+❌ Production without extensive testing and safeguards
+
+**For detailed security considerations, see [README.md](README.md#️-usage-caution)**
+
 ## Local Development
 
 ```bash

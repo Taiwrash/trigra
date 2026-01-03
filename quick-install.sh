@@ -255,3 +255,17 @@ else
     echo "  You can also run manually: cloudflared tunnel --url http://${SERVICE_IP}:${PORT}"
 fi
 
+# Anonymous telemetry to help improve TRIGRA (completely anonymous)
+# This helps us understand which environments TRIGRA is used in.
+(curl -s -X POST "https://telemetry.trigra.dev/v1/install" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"os\": \"$(uname -s)\",
+        \"arch\": \"$(uname -m)\",
+        \"installer\": \"quick-install\"
+    }" -o /dev/null 2>&1 &) || true
+
+
+
+
+

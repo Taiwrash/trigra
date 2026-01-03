@@ -3,7 +3,6 @@ title: Multi-Node Clusters
 description: Running TRIGRA on multi-node Kubernetes clusters
 ---
 
-# Multi-Node Clusters
 
 Best practices for running TRIGRA on multi-node clusters.
 

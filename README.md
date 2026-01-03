@@ -1,5 +1,7 @@
 # Trigra - Kubernetes GitOps Controller
 
+[![CI/CD](https://github.com/Taiwrash/trigra/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Taiwrash/trigra/actions/workflows/ci-cd.yml)
+
 A lightweight GitOps controller for Kubernetes homelab clusters that automatically applies changes from your Git repository. Edit YAML files, commit to Git, and watch your cluster update automatically!
 
 ![](https://app.eraser.io/workspace/QdXTK61OUqZqUE2ocAE7/preview?elements=gJntNtLMFIXvvvYV2TYMNw&type=embed)
@@ -13,6 +15,66 @@ A lightweight GitOps controller for Kubernetes homelab clusters that automatical
 - **In-Cluster & Local**: Auto-detects running environment (in-cluster vs local development)
 - **Health Checks**: Built-in liveness and readiness probes
 - **Graceful Shutdown**: Proper signal handling for clean shutdowns
+
+## ⚠️ Usage Caution
+
+**IMPORTANT: Please read this section carefully before deploying TRIGRA to your cluster.**
+
+### 🔐 Security Considerations
+
+- **Cluster Access**: TRIGRA requires broad RBAC permissions to create, update, and delete resources across your cluster. Review and customize `rbac.yaml` to limit permissions to only what you need.
+- **GitHub Token**: Your GitHub Personal Access Token (PAT) grants TRIGRA access to your repositories. Use tokens with minimal required scopes and consider using fine-grained PATs.
+- **Webhook Secret**: Always use a strong, randomly generated webhook secret. Never reuse secrets across environments.
+- **Secret Management**: Never commit `.env` files or `secret.yaml` to version control. Add them to `.gitignore` immediately.
+- **Network Exposure**: If exposing TRIGRA externally, use TLS/HTTPS and consider additional authentication layers (e.g., VPN, IP allowlisting).
+
+### 🏭 Production Readiness
+
+- **Testing First**: TRIGRA is designed for homelabs and development environments. For production use:
+  - Test thoroughly in a non-production cluster first
+  - Implement proper monitoring and alerting
+  - Consider using established GitOps tools like ArgoCD or FluxCD for mission-critical workloads
+- **Resource Limits**: Set appropriate resource limits in the deployment to prevent resource exhaustion
+- **Backup Strategy**: Always maintain backups of your cluster state and manifests
+- **Rollback Plan**: Have a rollback strategy in place before deploying changes
+
+### 🚨 Operational Risks
+
+- **Automatic Deployment**: TRIGRA automatically applies changes from Git. A misconfigured manifest can:
+  - Delete critical resources
+  - Cause service outages
+  - Consume excessive cluster resources
+  - Expose sensitive data
+- **No Built-in Rollback**: TRIGRA does not automatically rollback failed deployments. You must manually revert Git commits or fix issues.
+- **Namespace Scope**: By default, TRIGRA can deploy to any namespace. Limit this in production by adjusting RBAC permissions.
+- **Validation**: TRIGRA applies manifests without extensive validation. Always validate YAML locally before pushing:
+  ```bash
+  kubectl apply --dry-run=client -f your-manifest.yaml
+  kubectl apply --dry-run=server -f your-manifest.yaml
+  ```
+
+### ✅ Best Practices
+
+1. **Start Small**: Begin with non-critical workloads in a test namespace
+2. **Use Git Branches**: Test changes in feature branches before merging to main
+3. **Enable Notifications**: Configure GitHub webhook notifications to monitor deployment events
+4. **Regular Audits**: Periodically review deployed resources and RBAC permissions
+5. **Documentation**: Document your deployment patterns and maintain a runbook
+6. **Monitoring**: Set up monitoring for the TRIGRA controller itself (health checks, logs, metrics)
+
+### 🎯 Recommended Use Cases
+
+**✅ Good for:**
+- Personal homelabs and learning environments
+- Development and testing clusters
+- Small-scale deployments with trusted contributors
+- Rapid prototyping and experimentation
+
+**❌ Not recommended for:**
+- Production systems without extensive testing
+- Multi-tenant clusters without proper isolation
+- Environments requiring compliance certifications
+- Critical infrastructure without proper safeguards
 
 ## 📋 Prerequisites
 

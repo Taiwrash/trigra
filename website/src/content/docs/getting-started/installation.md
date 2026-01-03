@@ -1,9 +1,8 @@
 ---
-title: Installation
+title: Installation Guide
 description: Complete guide to installing TRIGRA on your Kubernetes cluster
 ---
 
-# Installation Guide
 
 This guide covers all installation methods for TRIGRA.
 

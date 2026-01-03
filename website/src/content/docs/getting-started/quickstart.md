@@ -7,6 +7,9 @@ Get TRIGRA up and running on your Kubernetes cluster in under 3 minutes.
 
 ![](https://app.eraser.io/workspace/QdXTK61OUqZqUE2ocAE7/preview?elements=gJntNtLMFIXvvvYV2TYMNw&type=embed)
 
+:::caution[⚠️ AUTOMATIC DEPLOYMENT WARNING]
+TRIGRA automatically applies ALL changes from Git to your cluster. A misconfigured manifest can delete resources or cause outages. **Always test in a non-production environment first.** [Read full security considerations →](/trigra/getting-started/installation/#security-considerations)
+:::
 
 ## Prerequisites
 

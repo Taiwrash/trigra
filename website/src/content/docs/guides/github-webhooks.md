@@ -3,7 +3,6 @@ title: GitHub Webhooks
 description: Configure GitHub webhooks for automated deployments
 ---
 
-# GitHub Webhooks
 
 This guide explains how to configure GitHub webhooks to trigger automated deployments with TRIGRA.
 
